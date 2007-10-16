@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Flash Video
+Plugin Name: Flash Video Player
 Version: 2.0 
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Player and SWFObject by Geoff Stearns.
