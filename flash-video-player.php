@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Flash Video
+Plugin Name: Flash Video Player
 Version: 2.0 
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Player and SWFObject by Geoff Stearns.
@@ -112,7 +112,7 @@ function FlashVideo_Render($matches) {
 }
 
 function FlashVideoAddPage() {
-	add_options_page('Flash Video', 'Flash Video', '8', 'flashvideo.php', 'FlashVideoOptions');
+	add_options_page('Flash Video', 'Flash Video', '8', 'flash-video-player.php', 'FlashVideoOptions');
 }
 
 function FlashVideoOptions() {
@@ -143,7 +143,7 @@ function FlashVideoOptions() {
 	echo '<div class="wrap">';
 	echo '<h2>Flash Video Options</h2>';
 	echo $message;
-	echo '<form method="post" action="options-general.php?page=flashvideo.php">';
+	echo '<form method="post" action="options-general.php?page=flash-video-player.php">';
 	echo '<p class="submit"><input type="submit" method="post" value="Update Options &raquo;"></p>';
 
 	echo "<p>Welcome to the flash video player plugin options menu! Here you can set all (or none) of the available player variables to default values for your website. If you have a question what valid values for the variables are, please consult the <a href='http://mac-dev.net/blog/flash-video-player-plugin-customization/'>online documentation</a>. If your question isn't answered there or in the <a href='http://mac-dev.net/blog/frequently-asked-questions/'>F.A.Q.</a>, please ask in the <a href='http://www.mac-dev.net/blog/forum'>forum</a>.</p>";
@@ -175,7 +175,7 @@ function FlashVideoOptions() {
 }
 
 function FlashVideo_head() {
-	$path = $site_url . '/wp-content/plugins/flashvideo/swfobject.js';
+	$path = $site_url . '/wp-content/plugins/flash-video-player/swfobject.js';
 	echo '<script type="text/javascript" src="' . $path . '"></script>' . "\n";
 }
 
@@ -221,7 +221,7 @@ function FlashVideoLoadDefaults() {
 	$f[0][4]['on'] = 'location';
 	$f[0][4]['dn'] = 'SWF Location';
 	$f[0][4]['t'] = 'tx';
-	$f[0][4]['v'] = $site_url . '/wp-content/plugins/flashvideo/flvplayer.swf';
+	$f[0][4]['v'] = $site_url . '/wp-content/plugins/flash-video-player/flvplayer.swf';
 
 	// Player Color
 
