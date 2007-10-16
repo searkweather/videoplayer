@@ -4,7 +4,7 @@ Donate link: http://www.mac-dev.net/
 Tags: flash, video, flv, mp3, player, wordpress, plugin, swf, media
 Requires at least: 2.2.2
 Tested up to: 2.3
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 
 The flash video plugin for WordPress allows the addition of video (and other media) to a WordPress website using standards-compliant markup and the leading open source software (Jeroen Wijering's FLV Player and Geoff Stearns' SWFObject Javascript Library). A full options menu is available with post-level overrides for endless customization. Installation is quick and easy, and no additional setup/coding/php knowledge is required. This plugin is low footprint, creating no tables, and uninstalling cleanly.
 
@@ -27,7 +27,7 @@ Check and make sure that you have the appropriate hook in your template file for
 
 = How can I get help? =
 
-* [Flash Player Download Site (Current Version)](http://mac-dev.net/blog/flash-video-plugin-for-wordpress/download)
+* [Flash Player Download Site (Current Version)](http://mac-dev.net/blog/download-flash-video-player-plugin-for-wordpress/)
 * [Flash Player Frequently Asked Questions (F.A.Q.)](http://mac-dev.net/blog/frequently-asked-questions/)
 * [Flash Player Complete Options](http://mac-dev.net/blog/flash-video-player-plugin-customization/)
 * [Flash Player Custom Color Examples](http://mac-dev.net/blog/flash-video-player-plugin-custom-color-examples/)
