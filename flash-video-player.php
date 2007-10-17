@@ -175,6 +175,7 @@ function FlashVideoOptions() {
 }
 
 function FlashVideo_head() {
+	global $site_url;
 	$path = $site_url . '/wp-content/plugins/flash-video-player/swfobject.js';
 	echo '<script type="text/javascript" src="' . $path . '"></script>' . "\n";
 }
