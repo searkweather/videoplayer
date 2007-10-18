@@ -60,11 +60,11 @@ function FlashVideo_Render($matches) {
 	$options = get_option('FlashVideoSettings');
 
 	/* Override inline parameters */
-	if ( array_key_exists('height', $arguments) ) {
-		$options[0][1]['v'] = $arguments['height'];
-	}
 	if ( array_key_exists('width', $arguments) ) {
-		$options[0][2]['v'] = $arguments['width'];
+		$options[0][1]['v'] = $arguments['width'];
+	}
+	if ( array_key_exists('height', $arguments) ) {
+		$options[0][2]['v'] = $arguments['height'];
 	}
 	if ( array_key_exists('image', $arguments) ) {
 		$arguments['image'] = $site_url . '/' . $arguments['image'];
@@ -82,7 +82,7 @@ function FlashVideo_Render($matches) {
     $output .= "\n" . '<span id="s' . $videoid . '" class="flashvideo">' . "\n";
     $output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
     $output .= '<script type="text/javascript">' . "\n";
-	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][4]['v'] . '","s' . $videoid . '","' . $options[0][2]['v'] . '","' . $options[0][1]['v'] . '","7");' . "\n";
+	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][4]['v'] . '","s' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][2]['v'] . '","7");' . "\n";
 	//$output .= 's1.addParam("allowfullscreen","true");';
 	for ( $i=0; $i<count($options);$i++ ) {
 		foreach ( (array) $options[$i] as $key=>$value ) {
