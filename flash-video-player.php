@@ -71,17 +71,23 @@ function FlashVideo_Render($matches) {
 	}
 	if ( array_key_exists('floatingcontrols', $arguments) ) {
 		if ( $arguments['floatingcontrols'] == 'true' ) {
-			$options[0][0]['v'] = $options[0][1]['v'];
+			$options[0][0]['v'] = $options[0][2]['v'];
 		}
 		if ( $arguments['floatingcontrols'] == 'false' ) {
-			$options[0][1]['v'] += 20;
 			$options[0][0]['v'] = '';
 		}
 	}
-		
-    $output .= "\n" . '<span id="s' . $videoid . '" class="flashvideo">' . "\n";
-    $output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
-    $output .= '<script type="text/javascript">' . "\n";
+	
+	if(strpos($arguments['filename'], 'http://') !== false || strpos($arguments['filename'], 'rtmp://') !== false) {
+		// This is a remote file, so leave it alone but clean it up a little
+		$arguments['filename'] = str_replace('&#038;','&',$arguments['filename']);
+	} else {
+		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
+	}
+	
+	$output .= "\n" . '<span id="s' . $videoid . '" class="flashvideo">' . "\n";
+   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
+    	$output .= '<script type="text/javascript">' . "\n";
 	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][4]['v'] . '","s' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][2]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");';
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","true");';
@@ -91,11 +97,11 @@ function FlashVideo_Render($matches) {
 			if ( array_key_exists($value['on'], $arguments) && $value['on'] != 'displayheight') {
 				$value['v'] = $arguments[$value['on']];
 			}
-			if ( $value['on'] == 'displayheight' ) {
+			// Handle Floating Controls for Default Values
+			if ( $value['on'] == 'displayheight' && !array_key_exists('floatingcontrols', $arguments) ) {
 				if ( $value['v'] == 'true' ) {
-					$value['v'] = $options[0][1]['v'];
+					$value['v'] = $options[0][2]['v'];
 				} else {
-					$value['v'] += 20;
 					$value['v'] = '';
 				}
 			}
@@ -104,7 +110,7 @@ function FlashVideo_Render($matches) {
 			}
 		}
 	}
-	$output .= 's' . $videoid . '.addVariable("file","' . $site_url . '/' . $arguments['filename'] . '");' . "\n";
+	$output .= 's' . $videoid . '.addVariable("file","' . $arguments['filename'] . '");' . "\n";
 	$output .= 's' . $videoid . '.write("s' . $videoid . '");' . "\n";
 	$output .= '</script>' . "\n";
 
