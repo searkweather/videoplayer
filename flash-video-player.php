@@ -437,6 +437,7 @@ register_deactivation_hook(__FILE__,'FlashVideo_deactivate');
 // CONTENT FILTER
 
 add_filter('the_content', 'FlashVideo_Parse');
+//add_filter('the_excerpt_rss', 'FlashVideo_Parse');
 
 // OPTIONS MENU
 
