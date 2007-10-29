@@ -85,12 +85,13 @@ function FlashVideo_Render($matches) {
 		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
 	}
 	
-	$output .= "\n" . '<span id="s' . $videoid . '" class="flashvideo">' . "\n";
+	$output .= "\n" . '<span id="video' . $videoid . '" class="flashvideo">' . "\n";
    	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
-	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][4]['v'] . '","s' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][2]['v'] . '","7");' . "\n";
+	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][4]['v'] . '","n" . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][2]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","always");' . "\n";
+	$output .= 's' . $videoid . '.addVariable("javascriptid","n' . $videoid . '");' . "\n";
 	for ( $i=0; $i<count($options);$i++ ) {
 		foreach ( (array) $options[$i] as $key=>$value ) {
 			/* Allow for inline override of all parameters */
@@ -111,7 +112,7 @@ function FlashVideo_Render($matches) {
 		}
 	}
 	$output .= 's' . $videoid . '.addVariable("file","' . $arguments['filename'] . '");' . "\n";
-	$output .= 's' . $videoid . '.write("s' . $videoid . '");' . "\n";
+	$output .= 's' . $videoid . '.write("video' . $videoid . '");' . "\n";
 	$output .= '</script>' . "\n";
 
 	$videoid++;
