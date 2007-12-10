@@ -106,7 +106,7 @@ function FlashVideo_Render($matches) {
 					$value['v'] = '';
 				}
 			}
-			if ( $value['v'] != '' && $value['on'] != 'height' && $value['on'] != 'width' && $value['on'] != 'location' ) {
+			if ( $value['v'] != '' && $value['on'] != 'location' ) {
 				$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
 			}
 		}
