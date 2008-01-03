@@ -106,7 +106,7 @@ function FlashVideo_Render($matches) {
 					$value['v'] = '';
 				}
 			}
-			if ( $value['v'] != '' && $value['on'] != 'height' && $value['on'] != 'width' && $value['on'] != 'location' ) {
+			if ( $value['v'] != '' && $value['on'] != 'location' ) {
 				$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
 			}
 		}
@@ -237,17 +237,22 @@ function FlashVideoLoadDefaults() {
 	$f[1][5]['on'] = 'backcolor';
 	$f[1][5]['dn'] = 'Background Color';
 	$f[1][5]['t'] = 'tx';
-	$f[1][5]['v'] = '';
+	$f[1][5]['v'] = '0xFFFFFF';
 
 	$f[1][6]['on'] = 'frontcolor';
 	$f[1][6]['dn'] = 'Foreground Color';
 	$f[1][6]['t'] = 'tx';
-	$f[1][6]['v'] = '';
+	$f[1][6]['v'] = '0x000000';
 
 	$f[1][7]['on'] = 'lightcolor';
 	$f[1][7]['dn'] = 'Light Color';
 	$f[1][7]['t'] = 'tx';
-	$f[1][7]['v'] = '';
+	$f[1][7]['v'] = '0x000000';
+
+	$f[1][41]['on'] = 'screencolor';
+	$f[1][41]['dn'] = 'Screen Color';
+	$f[1][41]['t'] = 'tx';
+	$f[1][41]['v'] = '0x000000';
 
 	// Appearance Settings
 
