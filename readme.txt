@@ -4,7 +4,7 @@ Donate link: http://www.mac-dev.net/
 Tags: flash, video, flv, mp3, player, wordpress, plugin, swf, media
 Requires at least: 2.2.2
 Tested up to: 2.3
-Stable tag: 2.0.12
+Stable tag: 2.0.13
 
 The flash video plugin for WordPress allows the addition of video (and other media) to a WordPress website using standards-compliant markup and the leading open source software (Jeroen Wijering's FLV Player and Geoff Stearns' SWFObject Javascript Library). A full options menu is available with post-level overrides for endless customization. Installation is quick and easy, and no additional setup/coding/php knowledge is required. This plugin is low footprint, creating no tables, and uninstalling cleanly.
 
@@ -24,6 +24,10 @@ The flash video plugin for WordPress allows the addition of video (and other med
 = I have activated the plugin, but don't see the video player. What do I do? =
 
 Check and make sure that you have the appropriate hook in your template file for the header: `<?php wp_head(); ?>`
+
+= The plugin seems to work fine, but search results, archive pages and rss feeds show code. What do I do? =
+
+At this stage, there are many templates available for WordPress. Each of them can differ in how they call the post and display it. Until I am able to update the plugin to handle this gracefully, you may need to alter your template to use the `<?php the_post(); ?>` tag or `<?php the_content(); ?>` instead of `<?php the_excerpt(); ?>`. Make sure that the template you're using is updated for the most recent version of WordPress for best compatibility.
 
 = How can I get help? =
 
