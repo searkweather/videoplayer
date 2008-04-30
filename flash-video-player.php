@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Flash Video Player
-Version: 2.0 
+Version: 2.1 
 Plugin URI: http://www.mac-dev.net
-Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Player and SWFObject by Geoff Stearns.
+Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
 Author URI: http://www.mac-dev.net
 
@@ -23,11 +23,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-1) Includes Jeroen Wijering's FLV Player (Creative Commons "BY-NC-SA" License) v3.12
-   Website: http://www.jeroenwijering.com/?item=Flash_Video_Player
+1) Includes Jeroen Wijering's FLV Media Player (Creative Commons "BY-NC-SA" License) v3.16
+   Website: http://www.jeroenwijering.com/?item=JW_FLV_Player
    License: http://creativecommons.org/licenses/by-nc-sa/2.0/
-2) Includes Geoff Stearns' SWFObject Javascript Library (MIT License) v1.5
-   Website: http://blog.deconcept.com/swfobject/
+2) Includes Geoff Stearns' SWFObject Javascript Library (MIT License) v2.0
+   Website: http://code.google.com/p/swfobject/
    License: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -85,8 +85,8 @@ function FlashVideo_Render($matches) {
 		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
 	}
 	
-	$output .= "\n" . '<span id="video' . $videoid . '" class="flashvideo">' . "\n";
-   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
+	$output .= "\n" . '<div id="video' . $videoid . '" class="flashvideo">' . "\n";
+   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</div>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
 	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][4]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][2]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
@@ -95,17 +95,20 @@ function FlashVideo_Render($matches) {
 	for ( $i=0; $i<count($options);$i++ ) {
 		foreach ( (array) $options[$i] as $key=>$value ) {
 			/* Allow for inline override of all parameters */
-			if ( array_key_exists($value['on'], $arguments) && $value['on'] != 'displayheight') {
+			if ( array_key_exists($value['on'], $arguments) && $value['on'] ) {
 				$value['v'] = $arguments[$value['on']];
 			}
+			/*
 			// Handle Floating Controls for Default Values
 			if ( $value['on'] == 'displayheight' && !array_key_exists('floatingcontrols', $arguments) ) {
+				//die("CHECK");
 				if ( $value['v'] == 'true' ) {
 					$value['v'] = $options[0][2]['v'];
 				} else {
 					$value['v'] = '';
 				}
 			}
+			*/
 			if ( $value['v'] != '' && $value['on'] != 'location' ) {
 				$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
 			}
@@ -152,18 +155,18 @@ function FlashVideoOptions() {
 	echo '<h2>Flash Video Options</h2>';
 	echo $message;
 	echo '<form method="post" action="options-general.php?page=flash-video-player.php">';
-	echo '<p class="submit"><input type="submit" method="post" value="Update Options &raquo;"></p>';
+	//echo '<p class="submit"><input type="submit" method="post" value="Update Options &raquo;"></p>';
 
 	echo "<p>Welcome to the flash video player plugin options menu! Here you can set all (or none) of the available player variables to default values for your website. If you have a question what valid values for the variables are, please consult the <a href='http://mac-dev.net/blog/flash-video-player-plugin-customization/'>online documentation</a>. If your question isn't answered there or in the <a href='http://mac-dev.net/blog/frequently-asked-questions/'>F.A.Q.</a>, please ask in the <a href='http://www.mac-dev.net/blog/forum'>forum</a>.</p>";
 
 	foreach( (array) $options as $key=>$value) {
-		echo '<fieldset class="options">';
-		echo '<legend>' . $g[$key] . '</legend>';
-		echo '<table class="optiontable">';
+		//echo '<fieldset class="options">';
+		echo '<h3>' . $g[$key] . '</h3>';
+		echo '<table class="form-table">';
 		foreach( (array) $value as $setting) {
 			echo '<tr><th scope="row">' . $setting['dn'] . '</th><td>';
 			if($setting['t'] == 'tx') {
-				echo '<input type="text" name="' . $setting['on'] . '" value="' . $setting['v'] . '" />';
+				echo '<input type="text" name="' . $setting['on'] . '" value="' . $setting['v'] . '" class="code" />';
 			} elseif ($setting['t'] == 'cb') {
 				echo '<input type="checkbox" class="check" name="' . $setting['on'] . '" ';
 				if($setting['v'] == 'true') {
@@ -174,7 +177,7 @@ function FlashVideoOptions() {
 			echo '</td></tr>';
 		}
 		echo '</table>';
-		echo '</fieldset>';
+		//echo '</fieldset>';
 	}
 
 	echo '<p class="submit"><input type="submit" method="post" value="Update Options &raquo;"></p>';
@@ -191,7 +194,6 @@ function FlashVideo_head() {
 add_action('wp_head', 'FlashVideo_head');
 
 function FlashVideoLoadDefaults() {
-	global $site_url;
 	$f = array();
 
 	/*
@@ -206,11 +208,11 @@ function FlashVideoLoadDefaults() {
 	*/
 	
 	//Basic Settings
-	
-	$f[0][0]['on'] = 'displayheight';
-	$f[0][0]['dn'] = 'Floating Controls';
-	$f[0][0]['t'] = 'cb';
-	$f[0][0]['v'] = '';
+
+	$f[0][0]['on'] = 'shownavigation';
+	$f[0][0]['dn'] = 'Show Navigation';
+	$f[0][0]['t'] = 'tx';
+	$f[0][0]['v'] = 'true';
 
 	$f[0][1]['on'] = 'width';
 	$f[0][1]['dn'] = 'Player Width';
@@ -220,7 +222,7 @@ function FlashVideoLoadDefaults() {
 	$f[0][2]['on'] = 'height';
 	$f[0][2]['dn'] = 'Player Height';
 	$f[0][2]['t'] = 'tx';
-	$f[0][2]['v'] = '240';
+	$f[0][2]['v'] = '260';
 
 	$f[0][3]['on'] = 'image';
 	$f[0][3]['dn'] = 'Poster Image';
@@ -230,24 +232,24 @@ function FlashVideoLoadDefaults() {
 	$f[0][4]['on'] = 'location';
 	$f[0][4]['dn'] = 'SWF Location';
 	$f[0][4]['t'] = 'tx';
-	$f[0][4]['v'] = $site_url . '/wp-content/plugins/flash-video-player/flvplayer.swf';
+	$f[0][4]['v'] = get_option('siteurl') . '/wp-content/plugins/flash-video-player/mediaplayer.swf';
 
 	// Player Color
 
 	$f[1][5]['on'] = 'backcolor';
 	$f[1][5]['dn'] = 'Background Color';
 	$f[1][5]['t'] = 'tx';
-	$f[1][5]['v'] = '0xFFFFFF';
+	$f[1][5]['v'] = '';
 
 	$f[1][6]['on'] = 'frontcolor';
 	$f[1][6]['dn'] = 'Foreground Color';
 	$f[1][6]['t'] = 'tx';
-	$f[1][6]['v'] = '0x000000';
+	$f[1][6]['v'] = '';
 
 	$f[1][7]['on'] = 'lightcolor';
 	$f[1][7]['dn'] = 'Light Color';
 	$f[1][7]['t'] = 'tx';
-	$f[1][7]['v'] = '0x000000';
+	$f[1][7]['v'] = '';
 
 	$f[1][41]['on'] = 'screencolor';
 	$f[1][41]['dn'] = 'Screen Color';
@@ -265,7 +267,12 @@ function FlashVideoLoadDefaults() {
 	$f[2][9]['dn'] = 'Display Width';
 	$f[2][9]['t'] = 'tx';
 	$f[2][9]['v'] = '';
-
+	
+	$f[2][42]['on'] = 'displayheight';
+	$f[2][42]['dn'] = 'Display Height';
+	$f[2][42]['t'] = 'tx';
+	$f[2][42]['v'] = '240';
+	
 	$f[2][10]['on'] = 'largecontrols';
 	$f[2][10]['dn'] = 'Large Controls';
 	$f[2][10]['t'] = 'cb';
