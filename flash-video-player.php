@@ -300,10 +300,10 @@ function FlashVideoLoadDefaults() {
 	$f[4][2]['t'] = 'tx';
 	$f[4][2]['v'] = '';
 	
-	$f[4][2]['on'] = 'thumbsinplaylist';
-	$f[4][2]['dn'] = 'Display Thumbnails in Playlist';
-	$f[4][2]['t'] = 'cb';
-	$f[4][2]['v'] = 'true';	
+	$f[4][3]['on'] = 'thumbsinplaylist';
+	$f[4][3]['dn'] = 'Display Thumbnails in Playlist';
+	$f[4][3]['t'] = 'cb';
+	$f[4][3]['v'] = 'true';	
 
 	// Playback Behavior
 	
