@@ -79,7 +79,7 @@ function FlashVideo_Render($matches) {
 	$output .= "\n" . '<div id="video' . $videoid . '" class="flashvideo">' . "\n";
    	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</div>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
-	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][0]['v'] . '","' . $options[0][1]['v'] . '","7");' . "\n";
+	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][0]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","always");' . "\n";
 	$output .= 's' . $videoid . '.addVariable("javascriptid","n' . $videoid . '");' . "\n";
