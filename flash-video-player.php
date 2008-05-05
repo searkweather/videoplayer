@@ -40,6 +40,15 @@ function FlashVideo_Parse($content) {
 	return $content;
 }
 
+function FlashVideo_Parse_RSS($content) {
+	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render_RSS", $content);
+	return $content;
+}
+
+function FlashVideo_Render_RSS($matches) {
+	return '';
+}
+
 function FlashVideo_Render($matches) {
 	global $videoid, $site_url;
 	$output = '';
@@ -61,10 +70,10 @@ function FlashVideo_Render($matches) {
 
 	/* Override inline parameters */
 	if ( array_key_exists('width', $arguments) ) {
-		$options[0][0]['v'] = $arguments['width'];
+		$options[0][1]['v'] = $arguments['width'];
 	}
 	if ( array_key_exists('height', $arguments) ) {
-		$options[0][1]['v'] = $arguments['height'];
+		$options[0][0]['v'] = $arguments['height'];
 	}
 	if ( array_key_exists('image', $arguments) ) {
 		$arguments['image'] = $site_url . '/' . $arguments['image'];
@@ -422,6 +431,11 @@ register_deactivation_hook(__FILE__,'FlashVideo_deactivate');
 // CONTENT FILTER
 
 add_filter('the_content', 'FlashVideo_Parse');
+
+// FEEDS FILTERS
+
+add_action('the_content_rss', 'FlashVideo_Parse_RSS');
+add_action('the_excerpt_rss', 'FlashVideo_Parse_RSS');
 
 // OPTIONS MENU
 
