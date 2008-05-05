@@ -40,6 +40,15 @@ function FlashVideo_Parse($content) {
 	return $content;
 }
 
+function FlashVideo_Parse_RSS($content) {
+	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render_RSS", $content);
+	return $content;
+}
+
+function FlashVideo_Render_RSS($matches) {
+	return '';
+}
+
 function FlashVideo_Render($matches) {
 	global $videoid, $site_url;
 	$output = '';
@@ -61,10 +70,10 @@ function FlashVideo_Render($matches) {
 
 	/* Override inline parameters */
 	if ( array_key_exists('width', $arguments) ) {
-		$options[0][0]['v'] = $arguments['width'];
+		$options[0][1]['v'] = $arguments['width'];
 	}
 	if ( array_key_exists('height', $arguments) ) {
-		$options[0][1]['v'] = $arguments['height'];
+		$options[0][0]['v'] = $arguments['height'];
 	}
 	if ( array_key_exists('image', $arguments) ) {
 		$arguments['image'] = $site_url . '/' . $arguments['image'];
@@ -79,7 +88,7 @@ function FlashVideo_Render($matches) {
 	$output .= "\n" . '<div id="video' . $videoid . '" class="flashvideo">' . "\n";
    	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</div>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
-	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][0]['v'] . '","' . $options[0][1]['v'] . '","7");' . "\n";
+	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][0]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","always");' . "\n";
 	$output .= 's' . $videoid . '.addVariable("javascriptid","n' . $videoid . '");' . "\n";
@@ -422,6 +431,11 @@ register_deactivation_hook(__FILE__,'FlashVideo_deactivate');
 // CONTENT FILTER
 
 add_filter('the_content', 'FlashVideo_Parse');
+
+// FEEDS FILTERS
+
+add_action('the_content_rss', 'FlashVideo_Parse_RSS');
+add_action('the_excerpt_rss', 'FlashVideo_Parse_RSS');
 
 // OPTIONS MENU
 
