@@ -85,8 +85,8 @@ function FlashVideo_Render($matches) {
 		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
 	}
 	
-	$output .= "\n" . '<div id="video' . $videoid . '" class="flashvideo">' . "\n";
-   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</div>' . "\n";
+	$output .= "\n" . '<span id="video' . $videoid . '" class="flashvideo">' . "\n";
+   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
 	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][0]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
@@ -277,7 +277,7 @@ function FlashVideoLoadDefaults() {
 	$f[3][1]['t'] = 'cb';
 	$f[3][1]['v'] = 'false';
 	
-	$f[3][2]['on'] = 'showndigits';
+	$f[3][2]['on'] = 'showdigits';
 	$f[3][2]['dn'] = 'Show Digits';
 	$f[3][2]['t'] = 'cb';
 	$f[3][2]['v'] = 'true';
