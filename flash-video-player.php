@@ -35,24 +35,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 $videoid = 0;
 $site_url = get_option('siteurl');
 
+
 function FlashVideo_Parse($content) {
 	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render", $content);
 	return $content;
 }
 
-function FlashVideo_Parse_RSS($content) {
-	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render_RSS", $content);
-	return $content;
-}
-
-function FlashVideo_Render_RSS($matches) {
-	return '';
-}
-
 function FlashVideo_Render($matches) {
 	global $videoid, $site_url;
 	$output = '';
-	
+	$rss_output = '';
 	$matches[1] = str_replace(array('&#8221;','&#8243;'), '', $matches[1]);
 	preg_match_all('/(\w*)=(.*?) /i', $matches[1], $attributes);
 	$arguments = array();
@@ -69,6 +61,14 @@ function FlashVideo_Render($matches) {
 	$options = get_option('FlashVideoSettings');
 
 	/* Override inline parameters */
+//	if ( !array_key_exists('displayheight', $arguments) ) {
+//		if( $options[4][1]['v'] == $arguments['height'];) {
+//			
+//		}
+//		$options[4][1]['v'] = $arguments['displayheight'];
+//	}
+	
+	
 	if ( array_key_exists('width', $arguments) ) {
 		$options[0][1]['v'] = $arguments['width'];
 	}
@@ -76,7 +76,19 @@ function FlashVideo_Render($matches) {
 		$options[0][0]['v'] = $arguments['height'];
 	}
 	if ( array_key_exists('image', $arguments) ) {
-		$arguments['image'] = $site_url . '/' . $arguments['image'];
+		// Respect remote images
+		if(strpos($arguments['image'], 'http://') === false) {
+			$arguments['image'] = $site_url . '/' . $arguments['image'];
+		}
+		// If an image is found, embed it in the RSS feed.
+		$rss_output .= '<img src="' . $arguments['image'] . '" />';
+	} else {
+		if ($options[0][2]['v'] == '') {
+			// Place the default image
+			$rss_output .= '<img src="' . $site_url . '/' . 'wp-content/plugins/flash-video-player/default_video_player.gif" />';
+		} else {
+			$rss_output .= '<img src="' . $options[0][2]['v'] . '" />';
+		}
 	}
 	if(strpos($arguments['filename'], 'http://') !== false || strpos($arguments['filename'], 'rtmp://') !== false) {
 		// This is a remote file, so leave it alone but clean it up a little
@@ -108,7 +120,11 @@ function FlashVideo_Render($matches) {
 	$output .= '</script>' . "\n";
 
 	$videoid++;
-	return $output;
+	if(is_feed()) {
+		return $rss_output;
+	} else {
+		return $output;
+	}
 }
 
 function FlashVideoAddPage() {
@@ -431,11 +447,6 @@ register_deactivation_hook(__FILE__,'FlashVideo_deactivate');
 // CONTENT FILTER
 
 add_filter('the_content', 'FlashVideo_Parse');
-
-// FEEDS FILTERS
-
-add_action('the_content_rss', 'FlashVideo_Parse_RSS');
-add_action('the_excerpt_rss', 'FlashVideo_Parse_RSS');
 
 // OPTIONS MENU
 
