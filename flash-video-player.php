@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Flash Video Player
-Version: 2.1 
+Version: 2.1.3
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
@@ -61,12 +61,17 @@ function FlashVideo_Render($matches) {
 	$options = get_option('FlashVideoSettings');
 
 	/* Override inline parameters */
-//	if ( !array_key_exists('displayheight', $arguments) ) {
-//		if( $options[4][1]['v'] == $arguments['height'];) {
-//			
-//		}
-//		$options[4][1]['v'] = $arguments['displayheight'];
-//	}
+	if ( !array_key_exists('displayheight', $arguments) ) {
+		if( $options[4][1]['v'] == '' ) {
+			if( !array_key_exists('height', $arguments) ) {
+				$options[4][1]['v'] = $options[0][0]['v'] - 20;
+			} else {
+				$options[4][1]['v'] = $arguments['height'] - 20;
+			}
+		}
+	} else {
+		$options[4][1]['v'] = $arguments['displayheight'];
+	}
 	
 	
 	if ( array_key_exists('width', $arguments) ) {
@@ -84,7 +89,7 @@ function FlashVideo_Render($matches) {
 		$rss_output .= '<img src="' . $arguments['image'] . '" />';
 	} else {
 		if ($options[0][2]['v'] == '') {
-			// Place the default image
+			// Place the default image, since there isn't one set.
 			$rss_output .= '<img src="' . $site_url . '/' . 'wp-content/plugins/flash-video-player/default_video_player.gif" />';
 		} else {
 			$rss_output .= '<img src="' . $options[0][2]['v'] . '" />';
@@ -318,7 +323,7 @@ function FlashVideoLoadDefaults() {
 	$f[4][1]['on'] = 'displayheight';
 	$f[4][1]['dn'] = 'Display Height';
 	$f[4][1]['t'] = 'tx';
-	$f[4][1]['v'] = '240';
+	$f[4][1]['v'] = '';
 	
 	$f[4][2]['on'] = 'displaywidth';
 	$f[4][2]['dn'] = 'Display Width';
