@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Flash Video Player
-Version: 2.1 
+Version: 2.1
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
@@ -35,30 +35,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 $videoid = 0;
 $site_url = get_option('siteurl');
 
+
 function FlashVideo_Parse($content) {
 	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render", $content);
 	return $content;
 }
 
-function FlashVideo_Parse_RSS($content) {
-	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render_RSS", $content);
-	return $content;
-}
-
-function FlashVideo_Render_RSS($matches) {
-	return '';
-}
-
 function FlashVideo_Render($matches) {
 	global $videoid, $site_url;
 	$output = '';
-	
+	$rss_output = '';
 	$matches[1] = str_replace(array('&#8221;','&#8243;'), '', $matches[1]);
 	preg_match_all('/(\w*)=(.*?) /i', $matches[1], $attributes);
 	$arguments = array();
 
 	foreach ( (array) $attributes[1] as $key => $value ) {
-		$arguments[$value] = $attributes[2][$key];
+		// Strip out legacy quotes
+		$arguments[$value] = str_replace('"', '', $attributes[2][$key]);
 	}
 
 	if ( !array_key_exists('filename', $arguments) ) {
@@ -69,6 +62,19 @@ function FlashVideo_Render($matches) {
 	$options = get_option('FlashVideoSettings');
 
 	/* Override inline parameters */
+	if ( !array_key_exists('displayheight', $arguments) ) {
+		if( $options[4][1]['v'] == '' ) {
+			if( !array_key_exists('height', $arguments) ) {
+				$options[4][1]['v'] = $options[0][0]['v'] - 20;
+			} else {
+				$options[4][1]['v'] = $arguments['height'] - 20;
+			}
+		}
+	} else {
+		$options[4][1]['v'] = $arguments['displayheight'];
+	}
+	
+	
 	if ( array_key_exists('width', $arguments) ) {
 		$options[0][1]['v'] = $arguments['width'];
 	}
@@ -76,7 +82,19 @@ function FlashVideo_Render($matches) {
 		$options[0][0]['v'] = $arguments['height'];
 	}
 	if ( array_key_exists('image', $arguments) ) {
-		$arguments['image'] = $site_url . '/' . $arguments['image'];
+		// Respect remote images
+		if(strpos($arguments['image'], 'http://') === false) {
+			$arguments['image'] = $site_url . '/' . $arguments['image'];
+		}
+		// If an image is found, embed it in the RSS feed.
+		$rss_output .= '<img src="' . $arguments['image'] . '" />';
+	} else {
+		if ($options[0][2]['v'] == '') {
+			// Place the default image, since there isn't one set.
+			$rss_output .= '<img src="' . $site_url . '/' . 'wp-content/plugins/flash-video-player/default_video_player.gif" />';
+		} else {
+			$rss_output .= '<img src="' . $options[0][2]['v'] . '" />';
+		}
 	}
 	if(strpos($arguments['filename'], 'http://') !== false || strpos($arguments['filename'], 'rtmp://') !== false) {
 		// This is a remote file, so leave it alone but clean it up a little
@@ -85,8 +103,8 @@ function FlashVideo_Render($matches) {
 		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
 	}
 	
-	$output .= "\n" . '<div id="video' . $videoid . '" class="flashvideo">' . "\n";
-   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</div>' . "\n";
+	$output .= "\n" . '<span id="video' . $videoid . '" class="flashvideo">' . "\n";
+   	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
 	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][0]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
@@ -108,7 +126,11 @@ function FlashVideo_Render($matches) {
 	$output .= '</script>' . "\n";
 
 	$videoid++;
-	return $output;
+	if(is_feed()) {
+		return $rss_output;
+	} else {
+		return $output;
+	}
 }
 
 function FlashVideoAddPage() {
@@ -277,7 +299,7 @@ function FlashVideoLoadDefaults() {
 	$f[3][1]['t'] = 'cb';
 	$f[3][1]['v'] = 'false';
 	
-	$f[3][2]['on'] = 'showndigits';
+	$f[3][2]['on'] = 'showdigits';
 	$f[3][2]['dn'] = 'Show Digits';
 	$f[3][2]['t'] = 'cb';
 	$f[3][2]['v'] = 'true';
@@ -302,7 +324,7 @@ function FlashVideoLoadDefaults() {
 	$f[4][1]['on'] = 'displayheight';
 	$f[4][1]['dn'] = 'Display Height';
 	$f[4][1]['t'] = 'tx';
-	$f[4][1]['v'] = '240';
+	$f[4][1]['v'] = '';
 	
 	$f[4][2]['on'] = 'displaywidth';
 	$f[4][2]['dn'] = 'Display Width';
@@ -432,10 +454,6 @@ register_deactivation_hook(__FILE__,'FlashVideo_deactivate');
 
 add_filter('the_content', 'FlashVideo_Parse');
 
-// FEEDS FILTERS
-
-add_action('the_content_rss', 'FlashVideo_Parse_RSS');
-add_action('the_excerpt_rss', 'FlashVideo_Parse_RSS');
 
 // OPTIONS MENU
 
