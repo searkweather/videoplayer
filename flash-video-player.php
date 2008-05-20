@@ -50,7 +50,8 @@ function FlashVideo_Render($matches) {
 	$arguments = array();
 
 	foreach ( (array) $attributes[1] as $key => $value ) {
-		$arguments[$value] = $attributes[2][$key];
+		// Strip out legacy quotes
+		$arguments[$value] = str_replace('"', '', $attributes[2][$key]);
 	}
 
 	if ( !array_key_exists('filename', $arguments) ) {
