@@ -1,4 +1,5 @@
 <?php
+
 /*
 Plugin Name: Flash Video Player
 Version: 2.1
