@@ -110,6 +110,7 @@ function FlashVideo_Render($matches) {
 	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][0]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","always");' . "\n";
+	$output .= 's' . $videoid . '.addParam("wmode","opaque");' . "\n";
 	$output .= 's' . $videoid . '.addVariable("javascriptid","n' . $videoid . '");' . "\n";
 	for ( $i=0; $i<count($options);$i++ ) {
 		foreach ( (array) $options[$i] as $key=>$value ) {
