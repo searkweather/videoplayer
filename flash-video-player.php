@@ -418,7 +418,7 @@ function FlashVideoLoadDefaults() {
 	$f[6][4]['v'] = '_self';
 
 	$f[6][5]['on'] = 'recommendations';
-	$f[6][5]['dn'] = 'Stream Script';
+	$f[6][5]['dn'] = 'Recommendations';
 	$f[6][5]['t'] = 'tx';
 	$f[6][5]['v'] = '';
 
