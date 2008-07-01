@@ -141,7 +141,7 @@ function FlashVideoAddPage() {
 
 function FlashVideoOptions() {
 	$message = '';	
-	$g = array(0=>'Basic', 1=>'Player Color', 2=>'Appearance', 3=>'Playback', 4=>'Interaction');
+	$g = array(0=>'Basic Settings', 1=>'Player Color', 2=>'Appearance Settings', 3=>'Controlbar Settings', 4=>'Playlist Appearance', 5=>'Playback Behavior', 6=>'External Communication', 'P'=>'Additional Flash Parameters');
 
 	$options = get_option('FlashVideoSettings');
 	if ($_POST) {
@@ -418,7 +418,7 @@ function FlashVideoLoadDefaults() {
 	$f[6][4]['v'] = '_self';
 
 	$f[6][5]['on'] = 'recommendations';
-	$f[6][5]['dn'] = 'Stream Script';
+	$f[6][5]['dn'] = 'Recommendations';
 	$f[6][5]['t'] = 'tx';
 	$f[6][5]['v'] = '';
 
