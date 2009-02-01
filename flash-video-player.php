@@ -104,12 +104,13 @@ function FlashVideo_Render($matches) {
 				$value['v'] = $arguments[$value['on']];
 			}
 			if ( $value['v'] != '' ) {
+				// Check to see if we're processing a "skin". If so, make the filename absolute using the 
+				// fully qualified path. This will ensure the player displays correctly on category pages as well.
 				if($value['on'] == 'skin') {
 					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . basename($value['v'],".swf") . '/' . $value['v'] . '");' . "\n";
 				} else {
 					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
-				}
-				
+				}		
 			}
 		}
 	}
@@ -135,6 +136,7 @@ function FlashVideoOptions() {
 	$g = array(0=>'File Properties', 1=>'Colors', 2=>'Layout', 3=>'Behavior', 4=>'External');
 
 	$options = get_option('FlashVideoSettings');
+	// Process form submission
 	if ($_POST) {
 		for($i=0; $i<count($options);$i++) {
 			foreach( (array) $options[$i] as $key=>$value) {
@@ -168,6 +170,7 @@ function FlashVideoOptions() {
 	//echo print_r($options);
 	//echo "</pre>";
 	
+	// Pull the directories listed in the skins folder to generate the dropdown list with valid skin files
 	chdir($skins_dir);
 	if ($handle = opendir($skins_dir)) {
 	    while (false !== ($file = readdir($handle))) {
@@ -179,6 +182,7 @@ function FlashVideoOptions() {
 	    }
 	    closedir($handle);
 	}
+	// Add the default value onto the beginning of the skins array
 	array_unshift($skins, 'undefined');
 
 	foreach( (array) $options as $key=>$value) {
@@ -213,8 +217,7 @@ function FlashVideoOptions() {
 			echo '</td></tr>';
 		}
 		echo '</table>';
-	
-
+		
 	echo '<p class="submit"><input class="button-primary" type="submit" method="post" value="Update Options"></p>';
 	echo '</form>';
 	echo '</div>';
@@ -222,8 +225,7 @@ function FlashVideoOptions() {
 
 function FlashVideo_head() {
 	global $site_url;
-	$path = $site_url . '/wp-content/plugins/flash-video-player/swfobject.js';
-	echo '<script type="text/javascript" src="' . $path . '"></script>' . "\n";
+	echo '<script type="text/javascript" src="' . $site_url . '/wp-content/plugins/flash-video-player/swfobject.js"></script>' . "\n";
 }
 
 add_action('wp_head', 'FlashVideo_head');
