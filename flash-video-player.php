@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: Flash Video Player
-Version: 2.1
+Version: 3.0
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
@@ -24,7 +24,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-1) Includes Jeroen Wijering's FLV Media Player (Creative Commons "BY-NC-SA" License) v3.16
+1) Includes Jeroen Wijering's FLV Media Player (Creative Commons "BY-NC-SA" License) v4.3
    Website: http://www.jeroenwijering.com/?item=JW_FLV_Player
    License: http://creativecommons.org/licenses/by-nc-sa/2.0/
 2) Includes Geoff Stearns' SWFObject Javascript Library (MIT License) v2.0
@@ -32,10 +32,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
    License: http://www.opensource.org/licenses/mit-license.php
 */
 
-
 $videoid = 0;
 $site_url = get_option('siteurl');
-
 
 function FlashVideo_Parse($content) {
 	$content = preg_replace_callback("/\[flashvideo ([^]]*)\/\]/i", "FlashVideo_Render", $content);
@@ -56,31 +54,19 @@ function FlashVideo_Render($matches) {
 	}
 
 	if ( !array_key_exists('filename', $arguments) ) {
-		return '<div style="background-color:#f99; padding:10px;">Error: Required parameter "filename" is missing!</div>';
+		return '<div style="background-color:#ff9;padding:10px;"><p>Error: Required parameter "filename" is missing!</p></div>';
 		exit;
 	}
 
 	$options = get_option('FlashVideoSettings');
 
 	/* Override inline parameters */
-	if ( !array_key_exists('displayheight', $arguments) ) {
-		if( $options[4][1]['v'] == '' ) {
-			if( !array_key_exists('height', $arguments) ) {
-				$options[4][1]['v'] = $options[0][0]['v'] - 20;
-			} else {
-				$options[4][1]['v'] = $arguments['height'] - 20;
-			}
-		}
-	} else {
-		$options[4][1]['v'] = $arguments['displayheight'];
-	}
-	
 	
 	if ( array_key_exists('width', $arguments) ) {
-		$options[0][1]['v'] = $arguments['width'];
+		$options[2][5]['v'] = $arguments['width'];
 	}
 	if ( array_key_exists('height', $arguments) ) {
-		$options[0][0]['v'] = $arguments['height'];
+		$options[2][1]['v'] = $arguments['height'];
 	}
 	if ( array_key_exists('image', $arguments) ) {
 		// Respect remote images
@@ -90,11 +76,11 @@ function FlashVideo_Render($matches) {
 		// If an image is found, embed it in the RSS feed.
 		$rss_output .= '<img src="' . $arguments['image'] . '" />';
 	} else {
-		if ($options[0][2]['v'] == '') {
+		if ($options[0][3]['v'] == '') {
 			// Place the default image, since there isn't one set.
 			$rss_output .= '<img src="' . $site_url . '/' . 'wp-content/plugins/flash-video-player/default_video_player.gif" />';
 		} else {
-			$rss_output .= '<img src="' . $options[0][2]['v'] . '" />';
+			$rss_output .= '<img src="' . $options[0][3]['v'] . '" />';
 		}
 	}
 	if(strpos($arguments['filename'], 'http://') !== false || strpos($arguments['filename'], 'rtmp://') !== false) {
@@ -103,23 +89,27 @@ function FlashVideo_Render($matches) {
 	} else {
 		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
 	}
-	
 	$output .= "\n" . '<span id="video' . $videoid . '" class="flashvideo">' . "\n";
    	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
-	$output .= 'var s' . $videoid . ' = new SWFObject("' . $options[0][5]['v'] . '","n' . $videoid . '","' . $options[0][1]['v'] . '","' . $options[0][0]['v'] . '","7");' . "\n";
+	$output .= 'var s' . $videoid . ' = new SWFObject("' . $site_url . '/wp-content/plugins/flash-video-player/mediaplayer/player.swf' . '","n' . $videoid . '","' . $options[2][1]['v'] . '","' . $options[2][5]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","always");' . "\n";
 	$output .= 's' . $videoid . '.addParam("wmode","opaque");' . "\n";
-	$output .= 's' . $videoid . '.addVariable("javascriptid","n' . $videoid . '");' . "\n";
+	$output .= 's' . $videoid . '.addVariable("id","n' . $videoid . '");' . "\n";
 	for ( $i=0; $i<count($options);$i++ ) {
 		foreach ( (array) $options[$i] as $key=>$value ) {
 			/* Allow for inline override of all parameters */
 			if ( array_key_exists($value['on'], $arguments) && $value['on'] ) {
 				$value['v'] = $arguments[$value['on']];
 			}
-			if ( $value['v'] != '' && $value['on'] != 'location' ) {
-				$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
+			if ( $value['v'] != '' ) {
+				if($value['on'] == 'skin') {
+					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . basename($value['v'],".swf") . '/' . $value['v'] . '");' . "\n";
+				} else {
+					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
+				}
+				
 			}
 		}
 	}
@@ -140,8 +130,9 @@ function FlashVideoAddPage() {
 }
 
 function FlashVideoOptions() {
+	global $site_url;
 	$message = '';	
-	$g = array(0=>'Basic Settings', 1=>'Player Color', 2=>'Appearance Settings', 3=>'Controlbar Settings', 4=>'Playlist Appearance', 5=>'Playback Behavior', 6=>'External Communication', 'P'=>'Additional Flash Parameters');
+	$g = array(0=>'File Properties', 1=>'Colors', 2=>'Layout', 3=>'Behavior', 4=>'External');
 
 	$options = get_option('FlashVideoSettings');
 	if ($_POST) {
@@ -170,26 +161,61 @@ function FlashVideoOptions() {
 	echo '<form method="post" action="options-general.php?page=flash-video-player.php">';
 	echo "<p>Welcome to the flash video player plugin options menu! Here you can set all (or none) of the available player variables to default values for your website. If you have a question what valid values for the variables are, please consult the <a href='http://mac-dev.net/blog/flash-video-player-plugin-customization/'>online documentation</a>. If your question isn't answered there or in the <a href='http://mac-dev.net/blog/frequently-asked-questions/'>F.A.Q.</a>, please ask in the <a href='http://www.mac-dev.net/blog/forum'>forum</a>.</p>";
 
+	$skins_dir = str_replace('wp-admin', 'wp-content', dirname($_SERVER['SCRIPT_FILENAME'])) . '/plugins/flash-video-player/skins/';
+	$skins = array();
+	
+	//echo "<pre>";
+	//echo print_r($options);
+	//echo "</pre>";
+	
+	chdir($skins_dir);
+	if ($handle = opendir($skins_dir)) {
+	    while (false !== ($file = readdir($handle))) {
+	        if ($file != "." && $file != "..") {
+				if(is_dir($file)) {
+					$skins[] = $file;
+				}
+	        }
+	    }
+	    closedir($handle);
+	}
+	array_unshift($skins, 'undefined');
+
 	foreach( (array) $options as $key=>$value) {
 		echo '<h3>' . $g[$key] . '</h3>';
 		echo '<table class="form-table">';
 		foreach( (array) $value as $setting) {
 			echo '<tr><th scope="row">' . $setting['dn'] . '</th><td>';
-			if($setting['t'] == 'tx') {
-				echo '<input type="text" name="' . $setting['on'] . '" value="' . $setting['v'] . '" class="code" />';
-			} elseif ($setting['t'] == 'cb') {
-				echo '<input type="checkbox" class="check" name="' . $setting['on'] . '" ';
-				if($setting['v'] == 'true') {
-					echo 'checked="checked"';
+			switch ($setting['t']) {
+				case 'tx':
+					echo '<input type="text" name="' . $setting['on'] . '" value="' . $setting['v'] . '" />';
+					break;
+				case 'dd':
+					echo '<select name="skin">';
+					foreach( (array) $skins as $v) {
+						$selected = '';
+						if($v . '.swf' == $setting['v']) {
+							$selected = ' selected';
+						}
+						echo '<option value="' . $v . '.swf"' . $selected . '>' . ucfirst($v) . '</option>';
+					}
+					echo '</select>';
+					break;
+				case 'cb':
+					echo '<input type="checkbox" class="check" name="' . $setting['on'] . '" ';
+					if($setting['v'] == 'true') {
+						echo 'checked="checked"';
+					}
+					echo ' />';
+					break;
 				}
-				echo ' />';
 			}
 			echo '</td></tr>';
 		}
 		echo '</table>';
-	}
+	
 
-	echo '<p class="submit"><input type="submit" method="post" value="Update Options &raquo;"></p>';
+	echo '<p class="submit"><input class="button-primary" type="submit" method="post" value="Update Options"></p>';
 	echo '</form>';
 	echo '</div>';
 }
@@ -213,40 +239,35 @@ function FlashVideoLoadDefaults() {
 	  v = Default Value
 	*/
 	
-	//Basic Settings
+	//File Properties
 	
-	$f[0][0]['on'] = 'height';
-	$f[0][0]['dn'] = 'Player Height';
+	$f[0][0]['on'] = 'author';
+	$f[0][0]['dn'] = 'Author';
 	$f[0][0]['t'] = 'tx';
-	$f[0][0]['v'] = '260';
-	
-	$f[0][1]['on'] = 'width';
-	$f[0][1]['dn'] = 'Player Width';
-	$f[0][1]['t'] = 'tx';
-	$f[0][1]['v'] = '320';
+	$f[0][0]['v'] = '';
 
-	$f[0][2]['on'] = 'image';
-	$f[0][2]['dn'] = 'Poster Image';
+	$f[0][1]['on'] = 'date';
+	$f[0][1]['dn'] = 'Publish Date';
+	$f[0][1]['t'] = 'tx';
+	$f[0][1]['v'] = '';
+
+	$f[0][2]['on'] = 'description';
+	$f[0][2]['dn'] = 'Description';
 	$f[0][2]['t'] = 'tx';
 	$f[0][2]['v'] = '';
-	
-	$f[0][3]['on'] = 'id';
-	$f[0][3]['dn'] = 'ID';
+
+	$f[0][3]['on'] = 'image';
+	$f[0][3]['dn'] = 'Preview Image';
 	$f[0][3]['t'] = 'tx';
 	$f[0][3]['v'] = '';
 	
-	$f[0][4]['on'] = 'searchbar';
-	$f[0][4]['dn'] = 'Search Bar';
-	$f[0][4]['t'] = 'cb';
-	$f[0][4]['v'] = 'false';
+	$f[0][4]['on'] = 'link';
+	$f[0][4]['dn'] = 'Link URL';
+	$f[0][4]['t'] = 'tx';
+	$f[0][4]['v'] = '';
+
+	//Colors
 	
-	$f[0][5]['on'] = 'location';
-	$f[0][5]['dn'] = 'Media Player Location';
-	$f[0][5]['t'] = 'tx';
-	$f[0][5]['v'] = get_option('siteurl') . '/wp-content/plugins/flash-video-player/mediaplayer.swf';
-
-	// Player Color
-
 	$f[1][0]['on'] = 'backcolor';
 	$f[1][0]['dn'] = 'Background Color';
 	$f[1][0]['t'] = 'tx';
@@ -265,178 +286,124 @@ function FlashVideoLoadDefaults() {
 	$f[1][3]['on'] = 'screencolor';
 	$f[1][3]['dn'] = 'Screen Color';
 	$f[1][3]['t'] = 'tx';
-	$f[1][3]['v'] = '0x000000';
-
-	// Appearance Settings
-
-	$f[2][0]['on'] = 'logo';
-	$f[2][0]['dn'] = 'Logo File';
+	$f[1][3]['v'] = '';
+	
+	//Layout
+	
+	$f[2][0]['on'] = 'controlbar';
+	$f[2][0]['dn'] = 'Controlbar';
 	$f[2][0]['t'] = 'tx';
-	$f[2][0]['v'] = $site_url;
+	$f[2][0]['v'] = 'bottom';
 
-	$f[2][1]['on'] = 'overstretch';
-	$f[2][1]['dn'] = 'Stretch Movie';
+	$f[2][1]['on'] = 'height';
+	$f[2][1]['dn'] = 'Player Height';
 	$f[2][1]['t'] = 'tx';
-	$f[2][1]['v'] = 'true';
+	$f[2][1]['v'] = '400';
 
-	$f[2][2]['on'] = 'showeq';
-	$f[2][2]['dn'] = 'Show Equalizer';
-	$f[2][2]['t'] = 'cb';
-	$f[2][2]['v'] = 'false';
+	$f[2][2]['on'] = 'playlist';
+	$f[2][2]['dn'] = 'Playlist';
+	$f[2][2]['t'] = 'tx';
+	$f[2][2]['v'] = 'none';
+
+	$f[2][3]['on'] = 'playlistsize';
+	$f[2][3]['dn'] = 'Playlist Size';
+	$f[2][3]['t'] = 'tx';
+	$f[2][3]['v'] = '';
 	
-	$f[2][3]['on'] = 'showicons';
-	$f[2][3]['dn'] = 'Show Load/Play Icons';
-	$f[2][3]['t'] = 'cb';
-	$f[2][3]['v'] = 'true';
+	$f[2][4]['on'] = 'skin';
+	$f[2][4]['dn'] = 'Skin';
+	$f[2][4]['t'] = 'dd';
+	$f[2][4]['v'] = '';
 	
-	// Controlbar Settings
-		
-	$f[3][0]['on'] = 'shownavigation';
-	$f[3][0]['dn'] = 'Show Controlbar';
+	$f[2][5]['on'] = 'width';
+	$f[2][5]['dn'] = 'Player Width';
+	$f[2][5]['t'] = 'tx';
+	$f[2][5]['v'] = '280';
+
+	//Behavior
+
+	$f[3][0]['on'] = 'autostart';
+	$f[3][0]['dn'] = 'Auto Start';
 	$f[3][0]['t'] = 'cb';
-	$f[3][0]['v'] = 'true';
+	$f[3][0]['v'] = 'false';
 
-	$f[3][1]['on'] = 'showstop';
-	$f[3][1]['dn'] = 'Show Stop Button';
-	$f[3][1]['t'] = 'cb';
-	$f[3][1]['v'] = 'false';
+	$f[3][1]['on'] = 'bufferlength';
+	$f[3][1]['dn'] = 'Buffer Length';
+	$f[3][1]['t'] = 'tx';
+	$f[3][1]['v'] = '1';
 	
-	$f[3][2]['on'] = 'showdigits';
-	$f[3][2]['dn'] = 'Show Digits';
-	$f[3][2]['t'] = 'cb';
-	$f[3][2]['v'] = 'true';
+	$f[3][2]['on'] = 'displayclick';
+	$f[3][2]['dn'] = 'Display Click';
+	$f[3][2]['t'] = 'tx';
+	$f[3][2]['v'] = 'play';
 	
-	$f[3][3]['on'] = 'showdownload';
-	$f[3][3]['dn'] = 'Show Download Button';
+	$f[3][3]['on'] = 'icons';
+	$f[3][3]['dn'] = 'Play Icon';
 	$f[3][3]['t'] = 'cb';
-	$f[3][3]['v'] = 'false';
+	$f[3][3]['v'] = 'true';
 	
-	$f[3][4]['on'] = 'usefullscreen';
-	$f[3][4]['dn'] = 'Use Full Screen';
-	$f[3][4]['t'] = 'cb';
-	$f[3][4]['v'] = 'true';
+	$f[3][4]['on'] = 'linktarget';
+	$f[3][4]['dn'] = 'Link Target';
+	$f[3][4]['t'] = 'tx';
+	$f[3][4]['v'] = '_blank';
 	
-	// Playlist Appearance
-		
-	$f[4][0]['on'] = 'autoscroll';
-	$f[4][0]['dn'] = 'Automatic Scroll';
-	$f[4][0]['t'] = 'cb';
-	$f[4][0]['v'] = 'false';
+	$f[3][5]['on'] = 'logo';
+	$f[3][5]['dn'] = 'Logo';
+	$f[3][5]['t'] = 'tx';
+	$f[3][5]['v'] = '';
+	
+	$f[3][6]['on'] = 'mute';
+	$f[3][6]['dn'] = 'Mute Sounds';
+	$f[3][6]['t'] = 'cb';
+	$f[3][6]['v'] = 'false';
+	
+	$f[3][7]['on'] = 'quality';
+	$f[3][7]['dn'] = 'High Quality';
+	$f[3][7]['t'] = 'cb';
+	$f[3][7]['v'] = 'true';
+	
+	$f[3][8]['on'] = 'repeat';
+	$f[3][8]['dn'] = 'Repeat';
+	$f[3][8]['t'] = 'tx';
+	$f[3][8]['v'] = 'none';
 
-	$f[4][1]['on'] = 'displayheight';
-	$f[4][1]['dn'] = 'Display Height';
-	$f[4][1]['t'] = 'tx';
-	$f[4][1]['v'] = '';
+	$f[3][9]['on'] = 'resizing';
+	$f[3][9]['dn'] = 'Resizing';
+	$f[3][9]['t'] = 'cb';
+	$f[3][9]['v'] = 'true';
 	
-	$f[4][2]['on'] = 'displaywidth';
-	$f[4][2]['dn'] = 'Display Width';
+	$f[3][10]['on'] = 'shuffle';
+	$f[3][10]['dn'] = 'Shuffle';
+	$f[3][10]['t'] = 'cb';
+	$f[3][10]['v'] = 'false';
+	
+	$f[3][11]['on'] = 'stretching';
+	$f[3][11]['dn'] = 'Stretching';
+	$f[3][11]['t'] = 'tx';
+	$f[3][11]['v'] = 'uniform';
+	
+	$f[3][12]['on'] = 'volume';
+	$f[3][12]['dn'] = 'Startup Volume';
+	$f[3][12]['t'] = 'tx';
+	$f[3][12]['v'] = '90';
+	
+	//External
+		
+	$f[4][0]['on'] = 'abouttext';
+	$f[4][0]['dn'] = 'About Text';
+	$f[4][0]['t'] = 'tx';
+	$f[4][0]['v'] = 'undefined';
+
+	$f[4][1]['on'] = 'aboutlink';
+	$f[4][1]['dn'] = 'About Link';
+	$f[4][1]['t'] = 'tx';
+	$f[4][1]['v'] = 'http://www.longtailvideo.com/players/';
+	
+	$f[4][2]['on'] = 'plugins';
+	$f[4][2]['dn'] = 'Plugins';
 	$f[4][2]['t'] = 'tx';
 	$f[4][2]['v'] = '';
-	
-	$f[4][3]['on'] = 'thumbsinplaylist';
-	$f[4][3]['dn'] = 'Display Thumbnails in Playlist';
-	$f[4][3]['t'] = 'cb';
-	$f[4][3]['v'] = 'true';	
 
-	// Playback Behavior
-	
-	$f[5][0]['on'] = 'audio';
-	$f[5][0]['dn'] = 'Additional Audio Track';
-	$f[5][0]['t'] = 'tx';
-	$f[5][0]['v'] = '';
-	
-	$f[5][1]['on'] = 'autostart';
-	$f[5][1]['dn'] = 'Automatically Start Playing';
-	$f[5][1]['t'] = 'cb';
-	$f[5][1]['v'] = 'false';
-	
-	$f[5][2]['on'] = 'bufferlength';
-	$f[5][2]['dn'] = 'Buffer Length';
-	$f[5][2]['t'] = 'tx';
-	$f[5][2]['v'] = '3';
-		
-	$f[5][3]['on'] = 'captions';
-	$f[5][3]['dn'] = 'Captions';
-	$f[5][3]['t'] = 'tx';
-	$f[5][3]['v'] = '';
-
-	$f[5][4]['on'] = 'fallback';
-	$f[5][4]['dn'] = 'Fallback FLV';
-	$f[5][4]['t'] = 'tx';
-	$f[5][4]['v'] = '';
-
-	$f[5][5]['on'] = 'repeat';
-	$f[5][5]['dn'] = 'Repeat Play';
-	$f[5][5]['t'] = 'cb';
-	$f[5][5]['v'] = 'false';
-
-	$f[5][6]['on'] = 'rotatetime';
-	$f[5][6]['dn'] = 'Rotate Time';
-	$f[5][6]['t'] = 'tx';
-	$f[5][6]['v'] = '5';
-
-	$f[5][7]['on'] = 'shuffle';
-	$f[5][7]['dn'] = 'Shuffle Play';
-	$f[5][7]['t'] = 'cb';
-	$f[5][7]['v'] = 'false';
-
-	$f[5][8]['on'] = 'smoothing';
-	$f[5][8]['dn'] = 'Video Smoothing';
-	$f[5][8]['t'] = 'cb';
-	$f[5][8]['v'] = 'true';
-
-	$f[5][9]['on'] = 'volume';
-	$f[5][9]['dn'] = 'Starting Volume';
-	$f[5][9]['t'] = 'tx';
-	$f[5][9]['v'] = '80';
-	
-	// External Communication
-
-	$f[6][0]['on'] = 'callback';
-	$f[6][0]['dn'] = 'Callback URL';
-	$f[6][0]['t'] = 'tx';
-	$f[6][0]['v'] = '';
-
-	$f[6][1]['on'] = 'enablejs';
-	$f[6][1]['dn'] = 'Enable JavaScript';
-	$f[6][1]['t'] = 'cb';
-	$f[6][1]['v'] = 'true';
-	
-	$f[6][2]['on'] = 'link';
-	$f[6][2]['dn'] = 'Link to Download File';
-	$f[6][2]['t'] = 'tx';
-	$f[6][2]['v'] = '';
-
-	$f[6][3]['on'] = 'linkfromdisplay';
-	$f[6][3]['dn'] = 'Hyperlink Player';
-	$f[6][3]['t'] = 'cb';
-	$f[6][3]['v'] = 'false';
-
-	$f[6][4]['on'] = 'linktarget';
-	$f[6][4]['dn'] = 'Hyperlink Target';
-	$f[6][4]['t'] = 'tx';
-	$f[6][4]['v'] = '_self';
-
-	$f[6][5]['on'] = 'recommendations';
-	$f[6][5]['dn'] = 'Recommendations';
-	$f[6][5]['t'] = 'tx';
-	$f[6][5]['v'] = '';
-
-	$f[6][6]['on'] = 'searchlink';
-	$f[6][6]['dn'] = 'Search Script Page';
-	$f[6][6]['t'] = 'tx';
-	$f[6][6]['v'] = 'http://search.longtail.tv/?q=';
-
-	$f[6][7]['on'] = 'streamscript';
-	$f[6][7]['dn'] = 'Stream Script';
-	$f[6][7]['t'] = 'tx';
-	$f[6][7]['v'] = '';
-		
-	$f[6][8]['on'] = 'type';
-	$f[6][8]['dn'] = 'File Type';
-	$f[6][8]['t'] = 'tx';
-	$f[6][8]['v'] = '';
-	
 	return $f;
 }
 
