@@ -186,10 +186,10 @@ function FlashVideoOptions() {
 	array_unshift($skins, 'undefined');
 
 	foreach( (array) $options as $key=>$value) {
-		echo '<h3>' . $g[$key] . '</h3>';
-		echo '<table class="form-table">';
+		echo '<h3>' . $g[$key] . '</h3>' . "\n";
+		echo '<table class="form-table">' . "\n";
 		foreach( (array) $value as $setting) {
-			echo '<tr><th scope="row">' . $setting['dn'] . '</th><td>';
+			echo '<tr><th scope="row">' . $setting['dn'] . '</th><td>' . "\n";
 			switch ($setting['t']) {
 				case 'tx':
 					echo '<input type="text" name="' . $setting['on'] . '" value="' . $setting['v'] . '" />';
@@ -213,11 +213,10 @@ function FlashVideoOptions() {
 					echo ' />';
 					break;
 				}
+				echo '</td></tr>' . "\n";
 			}
-			echo '</td></tr>';
+			echo '</table>' . "\n";
 		}
-		echo '</table>';
-		
 	echo '<p class="submit"><input class="button-primary" type="submit" method="post" value="Update Options"></p>';
 	echo '</form>';
 	echo '</div>';
