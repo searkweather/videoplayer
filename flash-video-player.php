@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: Flash Video Player
-Version: 3.0
+Version: 3.1
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
@@ -53,9 +53,14 @@ function FlashVideo_Render($matches) {
 		$arguments[$value] = str_replace('"', '', $attributes[2][$key]);
 	}
 
-	if ( !array_key_exists('filename', $arguments) ) {
-		return '<div style="background-color:#ff9;padding:10px;"><p>Error: Required parameter "filename" is missing!</p></div>';
+	if ( !array_key_exists('filename', $arguments) && !array_key_exists('file', $arguments) ) {
+		return '<div style="background-color:#ff9;padding:10px;"><p>Error: Required parameter "file" is missing!</p></div>';
 		exit;
+	}
+	
+	//Deprecate filename in favor of file. 
+	if(array_key_exists('filename', $arguments)) {
+		$arguments['file'] = $arguments['filename'];
 	}
 
 	$options = get_option('FlashVideoSettings');
@@ -83,16 +88,16 @@ function FlashVideo_Render($matches) {
 			$rss_output .= '<img src="' . $options[0][3]['v'] . '" />';
 		}
 	}
-	if(strpos($arguments['filename'], 'http://') !== false || strpos($arguments['filename'], 'rtmp://') !== false) {
+	if(strpos($arguments['file'], 'http://') !== false || strpos($arguments['file'], 'rtmp://') !== false) {
 		// This is a remote file, so leave it alone but clean it up a little
-		$arguments['filename'] = str_replace('&#038;','&',$arguments['filename']);
+		$arguments['file'] = str_replace('&#038;','&',$arguments['file']);
 	} else {
-		$arguments['filename'] = $site_url . '/' . $arguments['filename'];
+		$arguments['file'] = $site_url . '/' . $arguments['file'];
 	}
 	$output .= "\n" . '<span id="video' . $videoid . '" class="flashvideo">' . "\n";
    	$output .= '<a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</span>' . "\n";
     	$output .= '<script type="text/javascript">' . "\n";
-	$output .= 'var s' . $videoid . ' = new SWFObject("' . $site_url . '/wp-content/plugins/flash-video-player/mediaplayer/player.swf' . '","n' . $videoid . '","' . $options[2][1]['v'] . '","' . $options[2][5]['v'] . '","7");' . "\n";
+	$output .= 'var s' . $videoid . ' = new SWFObject("' . $site_url . '/wp-content/plugins/flash-video-player/mediaplayer/player.swf' . '","n' . $videoid . '","' . $options[2][5]['v'] . '","' . $options[2][1]['v'] . '","7");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowfullscreen","true");' . "\n";
 	$output .= 's' . $videoid . '.addParam("allowscriptaccess","always");' . "\n";
 	$output .= 's' . $videoid . '.addParam("wmode","opaque");' . "\n";
@@ -107,14 +112,16 @@ function FlashVideo_Render($matches) {
 				// Check to see if we're processing a "skin". If so, make the filename absolute using the 
 				// fully qualified path. This will ensure the player displays correctly on category pages as well.
 				if($value['on'] == 'skin') {
-					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . basename($value['v'],".swf") . '/' . $value['v'] . '");' . "\n";
+					if($value['v'] != 'undefined') {
+						$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . $value['v'] . '/' . $value['v'] . '.swf");' . "\n";
+					}
 				} else {
 					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
 				}		
 			}
 		}
 	}
-	$output .= 's' . $videoid . '.addVariable("file","' . $arguments['filename'] . '");' . "\n";
+	$output .= 's' . $videoid . '.addVariable("file","' . $arguments['file'] . '");' . "\n";
 	$output .= 's' . $videoid . '.write("video' . $videoid . '");' . "\n";
 	$output .= '</script>' . "\n";
 
@@ -184,6 +191,7 @@ function FlashVideoOptions() {
 	}
 	// Add the default value onto the beginning of the skins array
 	array_unshift($skins, 'undefined');
+	$options[2][4]['op'] = $skins;
 
 	foreach( (array) $options as $key=>$value) {
 		echo '<h3>' . $g[$key] . '</h3>' . "\n";
@@ -195,13 +203,13 @@ function FlashVideoOptions() {
 					echo '<input type="text" name="' . $setting['on'] . '" value="' . $setting['v'] . '" />';
 					break;
 				case 'dd':
-					echo '<select name="skin">';
-					foreach( (array) $skins as $v) {
+					echo '<select name="' . $setting['on'] . '">';
+					foreach( (array) $setting['op'] as $v) {
 						$selected = '';
-						if($v . '.swf' == $setting['v']) {
+						if($v == $setting['v']) {
 							$selected = ' selected';
 						}
-						echo '<option value="' . $v . '.swf"' . $selected . '>' . ucfirst($v) . '</option>';
+						echo '<option value="' . $v . '"' . $selected . '>' . ucfirst($v) . '</option>';
 					}
 					echo '</select>';
 					break;
@@ -293,19 +301,21 @@ function FlashVideoLoadDefaults() {
 	
 	$f[2][0]['on'] = 'controlbar';
 	$f[2][0]['dn'] = 'Controlbar';
-	$f[2][0]['t'] = 'tx';
+	$f[2][0]['t'] = 'dd';
 	$f[2][0]['v'] = 'bottom';
+	$f[2][0]['op'] = array('none', 'bottom', 'over');
 
 	$f[2][1]['on'] = 'height';
 	$f[2][1]['dn'] = 'Player Height';
 	$f[2][1]['t'] = 'tx';
-	$f[2][1]['v'] = '400';
+	$f[2][1]['v'] = '280';
 
 	$f[2][2]['on'] = 'playlist';
 	$f[2][2]['dn'] = 'Playlist';
-	$f[2][2]['t'] = 'tx';
+	$f[2][2]['t'] = 'dd';
 	$f[2][2]['v'] = 'none';
-
+	$f[2][2]['op'] = array('none','bottom', 'over', 'right');
+	
 	$f[2][3]['on'] = 'playlistsize';
 	$f[2][3]['dn'] = 'Playlist Size';
 	$f[2][3]['t'] = 'tx';
@@ -314,12 +324,13 @@ function FlashVideoLoadDefaults() {
 	$f[2][4]['on'] = 'skin';
 	$f[2][4]['dn'] = 'Skin';
 	$f[2][4]['t'] = 'dd';
-	$f[2][4]['v'] = '';
+	$f[2][4]['v'] = 'undefined';
+	$f[2][4]['op'] = array('undefined', 'bright', 'overlay', 'simple', 'stylish', 'swift', 'thin');
 	
 	$f[2][5]['on'] = 'width';
 	$f[2][5]['dn'] = 'Player Width';
 	$f[2][5]['t'] = 'tx';
-	$f[2][5]['v'] = '280';
+	$f[2][5]['v'] = '400';
 
 	//Behavior
 
@@ -335,8 +346,10 @@ function FlashVideoLoadDefaults() {
 	
 	$f[3][2]['on'] = 'displayclick';
 	$f[3][2]['dn'] = 'Display Click';
-	$f[3][2]['t'] = 'tx';
+	$f[3][2]['t'] = 'dd';
 	$f[3][2]['v'] = 'play';
+	$f[3][2]['op'] = array('play', 'link', 'fullscreen', 'none', 'mute', 'next');
+	
 	
 	$f[3][3]['on'] = 'icons';
 	$f[3][3]['dn'] = 'Play Icon';
@@ -365,8 +378,9 @@ function FlashVideoLoadDefaults() {
 	
 	$f[3][8]['on'] = 'repeat';
 	$f[3][8]['dn'] = 'Repeat';
-	$f[3][8]['t'] = 'tx';
+	$f[3][8]['t'] = 'dd';
 	$f[3][8]['v'] = 'none';
+	$f[3][8]['op'] = array('none', 'list', 'always', 'single');
 
 	$f[3][9]['on'] = 'resizing';
 	$f[3][9]['dn'] = 'Resizing';
@@ -380,20 +394,22 @@ function FlashVideoLoadDefaults() {
 	
 	$f[3][11]['on'] = 'stretching';
 	$f[3][11]['dn'] = 'Stretching';
-	$f[3][11]['t'] = 'tx';
+	$f[3][11]['t'] = 'dd';
 	$f[3][11]['v'] = 'uniform';
+	$f[3][11]['op'] = array('none', 'exactfit', 'uniform', 'fill');
 	
 	$f[3][12]['on'] = 'volume';
 	$f[3][12]['dn'] = 'Startup Volume';
-	$f[3][12]['t'] = 'tx';
+	$f[3][12]['t'] = 'dd';
 	$f[3][12]['v'] = '90';
+	$f[3][12]['v'] = array('0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100');
 	
 	//External
 		
 	$f[4][0]['on'] = 'abouttext';
 	$f[4][0]['dn'] = 'About Text';
 	$f[4][0]['t'] = 'tx';
-	$f[4][0]['v'] = 'undefined';
+	$f[4][0]['v'] = '';
 
 	$f[4][1]['on'] = 'aboutlink';
 	$f[4][1]['dn'] = 'About Link';
