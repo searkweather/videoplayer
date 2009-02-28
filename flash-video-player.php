@@ -280,6 +280,15 @@ function FlashVideoLoadDefaults() {
 	$f[0][5]['t'] = 'tx';
 	$f[0][5]['v'] = '';
 	
+	$f[0][6]['on'] = 'type';
+	$f[0][6]['dn'] = 'Type';
+	$f[0][6]['t'] = 'tx';
+	$f[0][6]['v'] = '';
+	
+	$f[0][7]['on'] = 'streamer';
+	$f[0][7]['dn'] = 'Streamer';
+	$f[0][7]['t'] = 'tx';
+	$f[0][7]['v'] = '';
 	//Colors
 	
 	$f[1][0]['on'] = 'backcolor';
