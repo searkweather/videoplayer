@@ -88,7 +88,7 @@ function FlashVideo_Render($matches) {
 			$rss_output .= '<img src="' . $options[0][3]['v'] . '" />';
 		}
 	}
-	if(strpos($arguments['file'], 'http://') !== false || strpos($arguments['file'], 'rtmp://') !== false) {
+	if(strpos($arguments['file'], 'http://') !== false || isset($arguments['streamer'])) {
 		// This is a remote file, so leave it alone but clean it up a little
 		$arguments['file'] = str_replace('&#038;','&',$arguments['file']);
 	} else {
@@ -113,10 +113,10 @@ function FlashVideo_Render($matches) {
 				// fully qualified path. This will ensure the player displays correctly on category pages as well.
 				if($value['on'] == 'skin') {
 					if($value['v'] != 'undefined') {
-						$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . $value['v'] . '/' . $value['v'] . '.swf");' . "\n";
+						$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . $value['v'] . '/' . trim($value['v']) . '.swf");' . "\n";
 					}
 				} else {
-					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . $value['v'] . '");' . "\n";
+					$output .= 's' . $videoid . '.addVariable("' . $value['on'] . '","' . trim($value['v']) . '");' . "\n";
 				}		
 			}
 		}
@@ -275,6 +275,20 @@ function FlashVideoLoadDefaults() {
 	$f[0][4]['t'] = 'tx';
 	$f[0][4]['v'] = '';
 
+	$f[0][5]['on'] = 'captions';
+	$f[0][5]['dn'] = 'Captions';
+	$f[0][5]['t'] = 'tx';
+	$f[0][5]['v'] = '';
+	
+	$f[0][6]['on'] = 'type';
+	$f[0][6]['dn'] = 'Type';
+	$f[0][6]['t'] = 'tx';
+	$f[0][6]['v'] = '';
+	
+	$f[0][7]['on'] = 'streamer';
+	$f[0][7]['dn'] = 'Streamer';
+	$f[0][7]['t'] = 'tx';
+	$f[0][7]['v'] = '';
 	//Colors
 	
 	$f[1][0]['on'] = 'backcolor';
@@ -349,7 +363,6 @@ function FlashVideoLoadDefaults() {
 	$f[3][2]['t'] = 'dd';
 	$f[3][2]['v'] = 'play';
 	$f[3][2]['op'] = array('play', 'link', 'fullscreen', 'none', 'mute', 'next');
-	
 	
 	$f[3][3]['on'] = 'icons';
 	$f[3][3]['dn'] = 'Play Icon';
