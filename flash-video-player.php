@@ -88,7 +88,7 @@ function FlashVideo_Render($matches) {
 			$rss_output .= '<img src="' . $options[0][3]['v'] . '" />';
 		}
 	}
-	if(strpos($arguments['file'], 'http://') !== false || isset($arguments['streamer'])) {
+	if(strpos($arguments['file'], 'http://') !== false || isset($arguments['streamer']) || strpos($arguments['file'], 'https://') !== false) {
 		// This is a remote file, so leave it alone but clean it up a little
 		$arguments['file'] = str_replace('&#038;','&',$arguments['file']);
 	} else {
