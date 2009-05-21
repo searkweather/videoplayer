@@ -45,7 +45,7 @@ function FlashVideo_Render($matches) {
 	$output = '';
 	$rss_output = '';
 	$matches[1] = str_replace(array('&#8221;','&#8243;'), '', $matches[1]);
-	preg_match_all('/(\w*)=(.*?) /i', $matches[1], $attributes);
+	preg_match_all('/([.w]*)=(.*?) /i', $matches[1], $attributes);
 	$arguments = array();
 
 	foreach ( (array) $attributes[1] as $key => $value ) {
