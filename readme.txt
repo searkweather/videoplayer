@@ -1,16 +1,16 @@
 === Flash Video Player ===
 Contributors: JoshuaE1974
 Donate link: http://www.mac-dev.net/
-Tags: flash, video, flv, mp3, player, wordpress, plugin, swf, media
+Tags: flash, video, flv, mp3, player, wordpress, plugin, swf, media, mp4, rtmp, playlist, google, analytics, longtail, ads
 Requires at least: 2.2.2
-Tested up to: 2.7
-Stable tag: 3.1.8
+Tested up to: 2.9.2
+Stable tag: 4.0.6
 
-The flash video plugin for WordPress allows the addition of video (and other media) to a WordPress website using standards-compliant markup and the leading open source software (Jeroen Wijering's FLV Player and Geoff Stearns' SWFObject Javascript Library). A full options menu is available with post-level overrides for endless customization. Installation is quick and easy, and no additional setup/coding/php knowledge is required. This plugin is low footprint, creating no tables, and uninstalling cleanly. Version 3 provides full support for skinning the player as well as video player plugins.
+The flash video plugin for WordPress allows the addition of video (and other media) to a WordPress website using standards-compliant markup and the leading open source software (Jeroen Wijering's FLV Player and Geoff Stearns' SWFObject Javascript Library). A full options menu is available with post-level overrides for endless customization. Installation is quick and easy, and no additional setup/coding/php knowledge is required. This plugin is low footprint, creating no tables, and uninstalling cleanly. Version 4 provides full support for skinning the player, integration with Google Analytics, and the capability to display ads from LongTail Solutions.
 
 == Description ==
 
-The flash video plugin for WordPress allows the addition of video (and other media) to a WordPress website using standards-compliant markup and the leading open source software (Jeroen Wijering's FLV Player and Geoff Stearns' SWFObject Javascript Library). A full options menu is available with post-level overrides for endless customization. Installation is quick and easy, and no additional setup/coding/php knowledge is required. This plugin is low footprint, creating no tables, and uninstalling cleanly. Version 3 provides full support for skinning the player as well as video player plugins.
+The flash video plugin for WordPress allows the addition of video (and other media) to a WordPress website using standards-compliant markup and the leading open source software (Jeroen Wijering's FLV Player and Geoff Stearns' SWFObject Javascript Library). A full options menu is available with post-level overrides for endless customization. Installation is quick and easy, and no additional setup/coding/php knowledge is required. This plugin is low footprint, creating no tables, and uninstalling cleanly. Version 4 provides full support for skinning the player, integration with Google Analytics, and the capability to display ads from LongTail Solutions.
 
 == Installation ==
 
