@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name: Flash Video Player
-Version: 4.0.6
+Version: 4.0.7
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
 Author URI: http://www.mac-dev.net
 
-Flash Video Plugin for Wordpress Copyright 2007  Joshua Eldridge
+Flash Video Plugin for Wordpress Copyright 2010  Joshua Eldridge
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-1) Includes Jeroen Wijering's FLV Media Player (Creative Commons "BY-NC-SA" License) v4.3
+1) Includes Jeroen Wijering's FLV Media Player (Creative Commons "BY-NC-SA" License) v5.1
    Website: http://www.jeroenwijering.com/?item=JW_FLV_Player
    License: http://creativecommons.org/licenses/by-nc-sa/2.0/
 2) Includes Geoff Stearns' SWFObject Javascript Library (MIT License) v2.1
@@ -280,7 +280,10 @@ function FlashVideoPlayerPlugin_optionspage() {
 		echo '<h3>' . $key . '</h3>' . "\n";
 		echo '<table class="form-table">' . "\n";
 		foreach( (array) $value as $k=>$v) {
-		echo '<tr><th scope="row">' . $v['dn'] . '</th><td>' . "\n";
+		// Adding Support for "Do Not Display"
+		if($v['t'] != 'dnd') {
+			echo '<tr><th scope="row">' . $v['dn'] . '</th><td>' . "\n";
+		}	
 		switch ($v['t']) {
 			case 'tx':
 				$size = '';
@@ -307,8 +310,13 @@ function FlashVideoPlayerPlugin_optionspage() {
 				}
 				echo ' />';
 				break;
+			case 'dnd':
+				break;
 			}
-			echo '</td></tr>' . "\n";
+			// Adding Support for "Do Not Display"
+			if($v['t'] != 'dnd') {
+				echo '</td></tr>' . "\n";
+			}
 		}
 		echo '</table>' . "\n";
 	}
@@ -324,31 +332,36 @@ function loadDefaultOptions() {
 			'author' => array ('dn' => 'Author', 't' => 'tx', 'v' => ''),
 			'date' => array ('dn' => 'Publish Date', 't' => 'tx', 'v' => ''),
 			'description' => array ('dn' => 'Description', 't' => 'tx', 'v' => ''),
+			// ADDED
+			//'duration' => array ('dn' => 'Duration', 't' => 'dnd', 'v' => ''),
+			'file' => array ('dn' => 'File Name', 't' => 'dnd', 'v' => ''),
 			'image' => array ('dn' => 'Preview Image', 't' => 'tx', 'v' => ''),
-			'link' => array ('dn' => 'Link URL', 't' => 'tx', 'v' => ''),
-			'file' => array ('dn' => 'File Name', 't' => 'tx', 'v' => ''),
+			// DEPRECATED
+			// 'link' => array ('dn' => 'Link URL', 't' => 'tx', 'v' => ''),
+			'start' => array ('dn' => 'Start', 't' => 'dnd', 'v' => ''),
 			'streamer' => array ('dn' => 'Streamer', 't' => 'tx', 'v' => ''),
-			'type' => array ('dn' => 'File Type', 't' => 'tx', 'v' => '')
-		),
-		'Colors' => array (
-			'backcolor' => array ('dn' => 'Background Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
-			'frontcolor' => array ('dn' => 'Foreground Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
-			'lightcolor' => array ('dn' => 'Light Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
-			'screencolor' => array ('dn' => 'Screen Color', 't' => 'tx', 'v' => '', 'sz'=>'8')
+			'provider' => array ('dn' => 'Provider', 't' => 'dd', 'v' => 'underfined', 'op'=> array('video','sound','image','youtube','http','rtmp'))
 		),
 		'Layout' => array (
 			'width' => array ('dn' => 'Player Width', 't' => 'tx', 'v' => '400', 'sz'=>'4'),
 			'height' => array ('dn' => 'Player Height', 't' => 'tx', 'v' => '280', 'sz'=>'4'),
+			'backcolor' => array ('dn' => 'Background Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
 			'controlbar' => array ('dn' => 'Controlbar', 't' => 'dd', 'v' => 'bottom', 'op'=> array('none', 'bottom', 'over')),
+			'dock' => array ('dn' => 'Dock', 't' => 'cb', 'v' => 'true'),
+			'frontcolor' => array ('dn' => 'Foreground Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'icons' => array ('dn' => 'Play Icon', 't' => 'cb', 'v' => 'false'),
+			'lightcolor' => array ('dn' => 'Light Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			
 			'playlist' => array ('dn' => 'Playlist', 't' => 'dd', 'v' => 'none', 'op'=> array('none','bottom', 'over', 'right')),
 			'playlistsize' => array ('dn' => 'Playlist Size', 't' => 'tx', 'v' => '', 'sz'=>'4'),
-			'skin'=> array ('dn' => 'Skin', 't' => 'dd', 'v' => 'undefined', 'op'=> array('undefined', 'bright', 'overlay', 'simple', 'stylish', 'swift', 'thin'))
+			'skin'=> array ('dn' => 'Skin', 't' => 'dd', 'v' => 'undefined', 'op'=> array('undefined', 'bright', 'overlay', 'simple', 'stylish', 'swift', 'thin')),
+			'screencolor' => array ('dn' => 'Screen Color', 't' => 'tx', 'v' => '', 'sz'=>'8')
 		),
 		'Behavior' => array (
 			'autostart' => array ('dn' => 'Auto Start', 't' => 'cb', 'v' => 'false'),
 			'bufferlength' => array ('dn' => 'Buffer Length', 't' => 'tx', 'v' => '1', 'sz'=>'1'),
 			'displayclick' => array ('dn' => 'Display Click', 't' => 'dd', 'v' => 'play', 'op' => array('play', 'link', 'fullscreen', 'none', 'mute', 'next')),
-			'icons' => array ('dn' => 'Play Icon', 't' => 'cb', 'v' => 'false'),
+			
 			'linktarget' =>array ('dn' => 'Link Target', 't' => 'tx', 'v' => '_blank', 'sz'=>'6'),
 			'logo' => array ('dn' => 'Logo', 't' => 'tx', 'v' => ''),
 			'mute' => array ('dn' => 'Mute Sounds', 't' => 'cb', 'v' => 'false'),
