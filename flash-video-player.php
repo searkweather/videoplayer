@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Flash Video Player
-Version: 4.0.7
+Version: 5.0.2
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
@@ -45,8 +45,8 @@ if(isset($saved_options['Plugin-Specific'])) {
 
 // Widget Functions Start
 function FlashVideoPlayerPlugin_widgetregister(){
-    register_sidebar_widget('Flash Video Player 4 Beta', 'FlashVideoPlayerPlugin_widget');
-    register_widget_control('Flash Video Player 4 Beta', 'FlashVideoPlayerPlugin_control');
+    register_sidebar_widget('Flash Video Player 5', 'FlashVideoPlayerPlugin_widget');
+    register_widget_control('Flash Video Player 5', 'FlashVideoPlayerPlugin_control');
  }
  	
 function FlashVideoPlayerPlugin_widget($a) {
@@ -137,10 +137,10 @@ function FlashVideoPlayerPlugin_renderplayer($tag_string) {
 	}
 	// Override inline parameters 
 	if ( array_key_exists('width', $inline_options) ) {
-		$saved_options['Layout']['width']['v'] = $inline_options['width'];
+		$saved_options['Video Size']['width']['v'] = $inline_options['width'];
 	}
 	if ( array_key_exists('height', $inline_options) ) {
-		$saved_options['Layout']['height']['v'] = $inline_options['height'];
+		$saved_options['Video Size']['height']['v'] = $inline_options['height'];
 	}
 	if ( array_key_exists('image', $inline_options) ) {
 		// Respect remote images
@@ -174,21 +174,10 @@ function FlashVideoPlayerPlugin_renderplayer($tag_string) {
 	
 	$output .= "\n" . '<!-- Start Flash Video Player Plugin -->';
 	
-	$content_tag = "\n" . '<span id="video' . $videoid . '" class="flashvideo"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this content.</span>';
+	$content_tag = "\n" . '<div id="video' . $videoid . '" class="flashvideo"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this content.</div>';
 
-	// This is the first pass, so check to see if we have AdSolution enabled
-	if($videoid == 0) {
-		if(trim($saved_options['External']['channel']) != '' || array_key_exists('channel', $inline_options)) {
-			$output .= "\n" . '<div id="mediaspace" name="mediaspace">';
-			$output .= $content_tag;
-			$output .= "\n" . '</div>';
-		} else {
-			$output = $content_tag;
-		}
-	} else {
-		$output = $content_tag;
-	}
-
+	$output = $content_tag;
+		
     $output .= "\n" . '<script type="text/javascript">';
 	foreach( (array) $saved_options as $k=>$v) {
 			foreach ( (array) $v as $key=>$value ) {
@@ -197,25 +186,29 @@ function FlashVideoPlayerPlugin_renderplayer($tag_string) {
 				$value['v'] = $inline_options[$key];
 			}
 			if ( $value['v'] != '' ) {
+				// Replace underscores with periods, this is a fix for the new variable names introduced in the 5.1 player.
+				if(strpos($key, '_') !== false) {
+					$key =  str_replace('_', '.', $key);
+				}
 				// Check to see if we're processing a "skin". If so, make the filename absolute using the 
 				// fully qualified path. This will ensure the player displays correctly on category pages as well.
 				if($key == 'skin') {
 					if($value['v'] != 'undefined') {
-						$flashvars[] = "\n\t" . $key . ': "' . $site_url . '/wp-content/plugins/flash-video-player/skins/' . $value['v'] . '/' . trim($value['v']) . '.swf"';
+						$flashvars[] = "\n\t'" . $key . "' : '" . $site_url . "/wp-content/plugins/flash-video-player/skins/" . $value['v'] . '/' . trim($value['v']) . ".swf'";
 					}
 				} else {
-					$flashvars[] = "\n\t" . $key . ': "' . trim($value['v']) . '"';
+					$flashvars[] = "\n\t'" . $key . "' : '" . trim($value['v']) . "'";
 				}	
 			}
 		}
 	}
 	$flashvars = implode(",", $flashvars);
-	$output .= "\n" . 'var params = { allowfullscreen: "true", allowscriptaccess: "always", wmode: "transparent" };';
-	$output .= "\n" . 'var attributes = { id: "longtail", name: "longtail" };';
+	$output .= "\n" . "var params = { 'allowfullscreen': 'true', 'allowscriptaccess': 'always', 'wmode': 'transparent' };";
+	$output .= "\n" . "var attributes = { 'id': 'video" . $videoid . "', 'name': 'video" . $videoid . "'};";
 	$output .= "\n" . 'var flashvars = {';
 	$output .=  $flashvars;
 	$output .= "\n" . ' };';
-	$output .= "\n" . 'swfobject.embedSWF("' . $site_url .'/wp-content/plugins/flash-video-player/mediaplayer/player.swf", "video' . $videoid . '", "' . $saved_options['Layout']['width']['v'] . '", "' . $saved_options['Layout']['height']['v'] . '", "9.0.0","' . $site_url . '/wp-content/plugins/flash-video-player/mediaplayer/expressinstall.swf", flashvars, params, attributes);';
+	$output .= "\n" . 'swfobject.embedSWF("' . $site_url .'/wp-content/plugins/flash-video-player/mediaplayer/player.swf", "video' . $videoid . '", "' . $saved_options['Video Size']['width']['v'] . '", "' . $saved_options['Video Size']['height']['v'] . '", "9.0.0","' . $site_url . '/wp-content/plugins/flash-video-player/mediaplayer/expressinstall.swf", flashvars, params, attributes);';
 	$output .= "\n" . '</script>';
 	$output .= "\n" . '<!-- End Flash Video Player Plugin -->' . "\n";
 	$videoid++;
@@ -230,7 +223,6 @@ function FlashVideoPlayerPlugin_optionspage() {
 	global $site_url, $saved_options, $plugin_specific;
 	$saved_options['Plugin-Specific'] = $plugin_specific;
 	$message = '';	
-	//$saved_options = get_option('FlashVideoPlayerPlugin_PlayerOptions');
 	// Process form submission
 	if ($_POST) {
 		foreach($saved_options as $h=>$o) {			
@@ -283,38 +275,33 @@ function FlashVideoPlayerPlugin_optionspage() {
 		// Adding Support for "Do Not Display"
 		if($v['t'] != 'dnd') {
 			echo '<tr><th scope="row">' . $v['dn'] . '</th><td>' . "\n";
-		}	
-		switch ($v['t']) {
-			case 'tx':
-				$size = '';
-				if(isset($v['sz'])) {
-					$size = ' size="' . $v['sz'] . '"';	
-				}
-				echo '<input type="text" name="' . $k . '" value="' . $v['v'] . '"' . $size . ' />';
-				break;
-			case 'dd':
-				echo '<select name="' . $k . '">';
-				foreach( (array) $v['op'] as $o) {
-					$selected = '';
-					if($o == $v['v']) {
-						$selected = ' selected';
+			switch ($v['t']) {
+				case 'tx':
+					$size = '';
+					if(isset($v['sz'])) {
+						$size = ' size="' . $v['sz'] . '"';	
 					}
-					echo '<option value="' . $o . '"' . $selected . '>' . ucfirst($o) . '</option>';
+					echo '<input type="text" name="' . $k . '" value="' . $v['v'] . '"' . $size . ' />';
+					break;
+				case 'dd':
+					echo '<select name="' . $k . '">';
+					foreach( (array) $v['op'] as $o) {
+						$selected = '';
+						if($o == $v['v']) {
+							$selected = ' selected';
+						}
+						echo '<option value="' . $o . '"' . $selected . '>' . ucfirst($o) . '</option>';
+					}
+					echo '</select>';
+					break;
+				case 'cb':
+					echo '<input type="checkbox" class="check" name="' . $k . '" ';
+					if($v['v'] == 'true') {
+						echo 'checked="checked"';
+					}
+					echo ' />';
+					break;
 				}
-				echo '</select>';
-				break;
-			case 'cb':
-				echo '<input type="checkbox" class="check" name="' . $k . '" ';
-				if($v['v'] == 'true') {
-					echo 'checked="checked"';
-				}
-				echo ' />';
-				break;
-			case 'dnd':
-				break;
-			}
-			// Adding Support for "Do Not Display"
-			if($v['t'] != 'dnd') {
 				echo '</td></tr>' . "\n";
 			}
 		}
@@ -329,59 +316,63 @@ function FlashVideoPlayerPlugin_optionspage() {
 function loadDefaultOptions() {
 	$options = array (
 		'File Properties' => array (
-			'author' => array ('dn' => 'Author', 't' => 'tx', 'v' => ''),
-			'date' => array ('dn' => 'Publish Date', 't' => 'tx', 'v' => ''),
-			'description' => array ('dn' => 'Description', 't' => 'tx', 'v' => ''),
-			// ADDED
-			//'duration' => array ('dn' => 'Duration', 't' => 'dnd', 'v' => ''),
+			'author' => array ('dn' => 'Author', 't' => 'dnd', 'v' => ''),
+			'date' => array ('dn' => 'Publish Date', 't' => 'dnd', 'v' => ''),
+			'description' => array ('dn' => 'Description', 't' => 'dnd', 'v' => ''),
+			'duration' => array ('dn' => 'Duration', 't' => 'dnd', 'v' => ''),
 			'file' => array ('dn' => 'File Name', 't' => 'dnd', 'v' => ''),
-			'image' => array ('dn' => 'Preview Image', 't' => 'tx', 'v' => ''),
-			// DEPRECATED
-			// 'link' => array ('dn' => 'Link URL', 't' => 'tx', 'v' => ''),
+			'image' => array ('dn' => 'Preview Image', 't' => 'dnd', 'v' => ''),
 			'start' => array ('dn' => 'Start', 't' => 'dnd', 'v' => ''),
 			'streamer' => array ('dn' => 'Streamer', 't' => 'tx', 'v' => ''),
-			'provider' => array ('dn' => 'Provider', 't' => 'dd', 'v' => 'underfined', 'op'=> array('video','sound','image','youtube','http','rtmp'))
+			'tags' => array ('dn' => 'Tags', 't' => 'dnd', 'v' => ''),
+			'title' => array ('dn' => 'Title', 't' => 'dnd', 'v' => ''),
+			'provider' => array ('dn' => 'Provider', 't' => 'dd', 'v' => 'video', 'op'=> array('video','sound','image','youtube','http','rtmp'))
+		),
+		'Video Size' => array (
+			'width' => array ('dn' => 'Player Width', 't' => 'tx', 'v' => '400', 'sz'=>'4'),
+			'height' => array ('dn' => 'Player Height', 't' => 'tx', 'v' => '280', 'sz'=>'4')
+		),
+		'Colors' => array (
+			'backcolor' => array ('dn' => 'Background Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'frontcolor' => array ('dn' => 'Foreground Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'lightcolor' => array ('dn' => 'Light Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'screencolor' => array ('dn' => 'Screen Color', 't' => 'tx', 'v' => '', 'sz'=>'8')
 		),
 		'Layout' => array (
-			'width' => array ('dn' => 'Player Width', 't' => 'tx', 'v' => '400', 'sz'=>'4'),
-			'height' => array ('dn' => 'Player Height', 't' => 'tx', 'v' => '280', 'sz'=>'4'),
-			'backcolor' => array ('dn' => 'Background Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
 			'controlbar' => array ('dn' => 'Controlbar', 't' => 'dd', 'v' => 'bottom', 'op'=> array('none', 'bottom', 'over')),
-			'dock' => array ('dn' => 'Dock', 't' => 'cb', 'v' => 'true'),
-			'frontcolor' => array ('dn' => 'Foreground Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'dock' => array ('dn' => 'Dock', 't' => 'cb', 'v' => 'false'),
 			'icons' => array ('dn' => 'Play Icon', 't' => 'cb', 'v' => 'false'),
-			'lightcolor' => array ('dn' => 'Light Color', 't' => 'tx', 'v' => '', 'sz'=>'8'),
-			
+			'logo_file' => array ('dn' => 'Logo File (Licensed)', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'logo_link' => array ('dn' => 'Logo Link (Licensed)', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'logo_hide' => array ('dn' => 'Logo Hide (Licensed)', 't' => 'cb', 'v' => 'false'),
+			'logo_position' => array ('dn' => 'Logo Position (Licensed)', 't' => 'dd', 'v' => 'bottom-left', 'op'=>array('bottom-left', 'bottom-right', 'top-left', 'top-right')),
 			'playlist' => array ('dn' => 'Playlist', 't' => 'dd', 'v' => 'none', 'op'=> array('none','bottom', 'over', 'right')),
-			'playlistsize' => array ('dn' => 'Playlist Size', 't' => 'tx', 'v' => '', 'sz'=>'4'),
-			'skin'=> array ('dn' => 'Skin', 't' => 'dd', 'v' => 'undefined', 'op'=> array('undefined', 'bright', 'overlay', 'simple', 'stylish', 'swift', 'thin')),
-			'screencolor' => array ('dn' => 'Screen Color', 't' => 'tx', 'v' => '', 'sz'=>'8')
+			'playlistsize' => array ('dn' => 'Playlist Size', 't' => 'tx', 'v' => '', 'sz'=>'4')
+		),
+		'Skin' => array (
+			'skin'=> array ('dn' => 'Skin', 't' => 'dd', 'v' => 'undefined', 'op'=> array('undefined', 'bright', 'overlay', 'simple', 'stylish', 'swift', 'thin'))
 		),
 		'Behavior' => array (
 			'autostart' => array ('dn' => 'Auto Start', 't' => 'cb', 'v' => 'false'),
 			'bufferlength' => array ('dn' => 'Buffer Length', 't' => 'tx', 'v' => '1', 'sz'=>'1'),
-			'displayclick' => array ('dn' => 'Display Click', 't' => 'dd', 'v' => 'play', 'op' => array('play', 'link', 'fullscreen', 'none', 'mute', 'next')),
-			
-			'linktarget' =>array ('dn' => 'Link Target', 't' => 'tx', 'v' => '_blank', 'sz'=>'6'),
-			'logo' => array ('dn' => 'Logo', 't' => 'tx', 'v' => ''),
+			// FUTURE
+			//'displaytitle' => array ('dn' => 'Display Title', 't' => 'cb', 'v' => 'false'),
+			'item' => array ('dn' => 'Playlist Item', 't' => 'tx', 'v' => '0', 'sz'=>'1'),
 			'mute' => array ('dn' => 'Mute Sounds', 't' => 'cb', 'v' => 'false'),
-			'quality' => array ('dn' => 'High Quality', 't' => 'cb', 'v' => 'true'),
 			'repeat' => array ('dn' => 'Repeat', 't' => 'dd', 'v' => 'none', 'op' => array('none', 'list', 'always', 'single')),
-			'resizing' => array ('dn' => 'Resizing', 't' => 'cb', 'v' => 'true'),
 			'shuffle' => array ('dn' => 'Shuffle', 't' => 'cb', 'v' => 'false'),
+			'smoothing' => array ('dn' => 'Smoothing', 't' => 'cb', 'v' => 'false'),
 			'stretching' => array ('dn' => 'Stretching', 't' => 'dd', 'v' => 'uniform', 'op' => array('none', 'exactfit', 'uniform', 'fill')),
-			'volume' => array ('dn' => 'Startup Volume', 't' => 'dd', 'v' => '90', 'op' => array('0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100')),
-			'captions' => array ('dn' => 'Captions', 't' => 'tx', 'v' => '')
+			'volume' => array ('dn' => 'Startup Volume', 't' => 'dd', 'v' => '90', 'op' => array('0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'))
 		),
 		'External' => array (
-			'abouttext' => array ('dn' => 'About Text', 't' => 'tx', 'v' => ''),
-			'aboutlink' => array ('dn' => 'About Link', 't' => 'tx', 'v' => 'http://www.longtailvideo.com/players/'),
-			'plugins' => array ('dn' => 'Plugins', 't' => 'tx', 'v' => ''),
-			'channel' => array ('dn' =>'Long Tail Channel ID', 't' => 'tx', 'v' => '')
+			'plugins' => array ('dn' => 'Plugins', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'ltas_cc' => array ('dn' =>'Long Tail Channel', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'config' => array ('dn' =>'Config XML', 't' => 'tx', 'v' => '', 'sz'=>'8'),
+			'debug' => array ('dn' =>'Player Debug', 't' => 'dd', 'v' => 'undefined', 'op' => array('undefined','arthropod', 'console', 'trace'))
 		),
 		'Plugin-Specific' => array (
-			'swfobject' => array ('dn' => 'SWFObject Source', 't' => 'dd', 'v' => 'local', 'op' => array('local', 'google', 'none')),
-			'ltasurl' => array ('dn' => 'Long Tail Custom Script URL', 't' => 'tx', 'v' => '')
+			'swfobject' => array ('dn' => 'SWFObject Source', 't' => 'dd', 'v' => 'local', 'op' => array('local', 'google', 'none'))
 		)
 	);
 return $options;
