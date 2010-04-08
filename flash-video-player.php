@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Flash Video Player
-Version: 5.0.3
+Version: 5.0.4
 Plugin URI: http://www.mac-dev.net
 Description: Simplifies the process of adding video to a WordPress blog. Powered by Jeroen Wijering's FLV Media Player and SWFObject by Geoff Stearns.
 Author: Joshua Eldridge
@@ -185,7 +185,7 @@ function FlashVideoPlayerPlugin_renderplayer($tag_string) {
 			if ( array_key_exists($key, $inline_options) ) {
 				$value['v'] = $inline_options[$key];
 			}
-			if ( $value['v'] != '' ) {
+			if ( $value['v'] != '' && $value['v'] != 'undefined') {
 				// Replace underscores with periods, this is a fix for the new variable names introduced in the 5.1 player.
 				if(strpos($key, '_') !== false) {
 					$key =  str_replace('_', '.', $key);
@@ -193,9 +193,9 @@ function FlashVideoPlayerPlugin_renderplayer($tag_string) {
 				// Check to see if we're processing a "skin". If so, make the filename absolute using the 
 				// fully qualified path. This will ensure the player displays correctly on category pages as well.
 				if($key == 'skin') {
-					if($value['v'] != 'undefined') {
+					//if($value['v'] != 'undefined') {
 						$flashvars[] = "\n\t'" . $key . "' : '" . $site_url . "/wp-content/plugins/flash-video-player/skins/" . $value['v'] . '/' . trim($value['v']) . ".swf'";
-					}
+					//}
 				} else {
 					$flashvars[] = "\n\t'" . $key . "' : '" . trim($value['v']) . "'";
 				}	
@@ -326,7 +326,7 @@ function loadDefaultOptions() {
 			'streamer' => array ('dn' => 'Streamer', 't' => 'tx', 'v' => ''),
 			'tags' => array ('dn' => 'Tags', 't' => 'dnd', 'v' => ''),
 			'title' => array ('dn' => 'Title', 't' => 'dnd', 'v' => ''),
-			'provider' => array ('dn' => 'Provider', 't' => 'dd', 'v' => 'video', 'op'=> array('video','sound','image','youtube','http','rtmp'))
+			'provider' => array ('dn' => 'Provider', 't' => 'dd', 'v' => 'undefined', 'op'=> array('undefined','video','sound','image','youtube','http','rtmp'))
 		),
 		'Video Size' => array (
 			'width' => array ('dn' => 'Player Width', 't' => 'tx', 'v' => '400', 'sz'=>'4'),
@@ -341,7 +341,7 @@ function loadDefaultOptions() {
 		'Layout' => array (
 			'controlbar' => array ('dn' => 'Controlbar', 't' => 'dd', 'v' => 'bottom', 'op'=> array('none', 'bottom', 'over')),
 			'dock' => array ('dn' => 'Dock', 't' => 'cb', 'v' => 'false'),
-			'icons' => array ('dn' => 'Play Icon', 't' => 'cb', 'v' => 'false'),
+			'icons' => array ('dn' => 'Play Icon', 't' => 'cb', 'v' => 'true'),
 			'logo_file' => array ('dn' => 'Logo File (Licensed)', 't' => 'tx', 'v' => '', 'sz'=>'8'),
 			'logo_link' => array ('dn' => 'Logo Link (Licensed)', 't' => 'tx', 'v' => '', 'sz'=>'8'),
 			'logo_hide' => array ('dn' => 'Logo Hide (Licensed)', 't' => 'cb', 'v' => 'false'),
@@ -361,7 +361,7 @@ function loadDefaultOptions() {
 			'mute' => array ('dn' => 'Mute Sounds', 't' => 'cb', 'v' => 'false'),
 			'repeat' => array ('dn' => 'Repeat', 't' => 'dd', 'v' => 'none', 'op' => array('none', 'list', 'always', 'single')),
 			'shuffle' => array ('dn' => 'Shuffle', 't' => 'cb', 'v' => 'false'),
-			'smoothing' => array ('dn' => 'Smoothing', 't' => 'cb', 'v' => 'false'),
+			'smoothing' => array ('dn' => 'Smoothing', 't' => 'cb', 'v' => 'true'),
 			'stretching' => array ('dn' => 'Stretching', 't' => 'dd', 'v' => 'uniform', 'op' => array('none', 'exactfit', 'uniform', 'fill')),
 			'volume' => array ('dn' => 'Startup Volume', 't' => 'dd', 'v' => '90', 'op' => array('0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'))
 		),
